@@ -18,7 +18,7 @@ Customer support teams often deal with a large volume of repetitive questions al
 ---
 
 ## Example Workflow
-1. A customer submits a support query through a **webhook** from a website chat widget or email.
+1. A customer submits a support query via a webhook, triggered from a website chat widget or email—automatically sending the request to the support system in real time.
 2. The **Intake Classifier Agent** analyzes the query and categorizes it by topic and urgency.
 3. The **Sentiment Analyzer Agent** evaluates the tone of the message as positive, neutral, or negative.
 4. If the query matches a known FAQ, the **FAQ Responder Agent** generates an instant response using the knowledge base.
