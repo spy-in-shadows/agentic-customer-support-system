@@ -100,7 +100,6 @@ The dashboard will track:
 
 ## Links
 - **GitHub Repository Link:** https://github.com/spy-in-shadows/agentic-customer-support-system
-git push -u origin main
 - **Deployment Link:**
 
 ---
