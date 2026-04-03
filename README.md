@@ -98,15 +98,10 @@ The dashboard will track:
 
 ---
 
-## Project Status
-**Status:** Good to Go  
-**Reviewed By:** Ankur
-
----
-
 ## Links
-- **GitHub Repository Link:** _Add here_
-- **Deployment Link:** _Add here_
+- **GitHub Repository Link:** https://github.com/spy-in-shadows/agentic-customer-support-system
+git push -u origin main
+- **Deployment Link:**
 
 ---
 
@@ -119,7 +114,7 @@ The dashboard will track:
 
 ---
 
-## Author
+## Authors
 **Krishna Verma**
 **Sambuddha Banerjee**
 **Aniruddha Dwivedi**
