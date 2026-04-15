@@ -1,0 +1,47 @@
+[
+  {
+    "id": "REQ-1001",
+    "customer_id": "cust_001",
+    "channel": "website_chat",
+    "query": "How do I reset my password?",
+    "expected_category": "account",
+    "expected_sentiment": "neutral",
+    "expected_status": "resolved"
+  },
+  {
+    "id": "REQ-1002",
+    "customer_id": "cust_002",
+    "channel": "email",
+    "query": "Do you offer student discounts?",
+    "expected_category": "general",
+    "expected_sentiment": "neutral",
+    "expected_status": "resolved"
+  },
+  {
+    "id": "REQ-1003",
+    "customer_id": "cust_003",
+    "channel": "website_chat",
+    "query": "I was charged twice for my subscription and I am very frustrated.",
+    "expected_category": "billing",
+    "expected_sentiment": "negative",
+    "expected_status": "escalated"
+  },
+  {
+    "id": "REQ-1004",
+    "customer_id": "cust_004",
+    "channel": "whatsapp",
+    "query": "Your app keeps crashing when I upload a file.",
+    "expected_category": "technical",
+    "expected_sentiment": "negative",
+    "expected_status": "escalated"
+  },
+  {
+    "id": "REQ-1005",
+    "customer_id": "cust_005",
+    "channel": "email",
+    "query": "How can I cancel my subscription?",
+    "expected_category": "billing",
+    "expected_sentiment": "neutral",
+    "expected_status": "resolved"
+  }
+]

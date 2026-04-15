@@ -1,125 +1,214 @@
 # Agentic Customer Support System
 
-## Overview
-The **Agentic Customer Support System** is a multi-agent AI workflow designed to automate and streamline customer support operations. It uses specialized agents to classify customer queries, analyze sentiment, answer common FAQ-based questions, and escalate complex or sensitive issues to human support agents.
+Agentic Customer Support System is a multi-agent support workflow that automates first-line customer service across website chat, email, or webhook-based channels. It uses specialized AI agents for intake classification, sentiment analysis, FAQ resolution, and escalation, while keeping a human-in-the-loop for sensitive or unresolved cases.
 
-The system is orchestrated using **n8n/Flowise**, enabling smooth coordination between different AI agents and external integrations such as webhooks, dashboards, and ticketing systems.
-
----
+This repository includes:
+- workflow exports for `n8n` and `Flowise`
+- a React demo frontend for live walkthroughs
+- project architecture, API, prompt, and testing documentation
+- sample FAQ and support query datasets
+- a lightweight dashboard starter for analytics demos
 
 ## Problem Statement
-Customer support teams often deal with a large volume of repetitive questions along with complex issues that require human attention. This project aims to reduce manual workload by building an intelligent multi-agent support system that can:
-- categorize incoming support requests
-- detect urgency and customer sentiment
-- instantly answer frequently asked questions
-- escalate complex or high-risk queries to human agents
-- log all interactions for analytics and performance monitoring
 
----
+Support teams spend significant time answering repetitive questions while also managing urgent, emotional, or technically complex issues that need human judgment. This project reduces manual load by routing each customer message through a multi-agent pipeline that can:
+- classify the query topic and urgency
+- detect customer sentiment
+- answer common questions from a knowledge base
+- escalate high-risk or unresolved cases to a human agent
+- log each interaction for monitoring and analytics
+
+## Core Features
+
+- Intake classifier agent for topic and urgency detection
+- FAQ responder agent powered by a knowledge base
+- Sentiment analyzer agent for mood detection and risk flagging
+- Escalation handler agent for human handoff
+- Orchestration layer coordinating all agent decisions
+- Webhook-based integration for incoming support messages
+- Conversation logging for traceability
+- Analytics dashboard for response and escalation metrics
+- Customizable prompt templates for each agent role
+- Full workflow architecture documentation
 
 ## Example Workflow
-1. A customer submits a support query via a webhook, triggered from a website chat widget or email—automatically sending the request to the support system in real time.
-2. The **Intake Classifier Agent** analyzes the query and categorizes it by topic and urgency.
-3. The **Sentiment Analyzer Agent** evaluates the tone of the message as positive, neutral, or negative.
-4. If the query matches a known FAQ, the **FAQ Responder Agent** generates an instant response using the knowledge base.
-5. If the issue is complex or the sentiment is highly negative, the **Escalation Handler Agent** creates a support ticket and routes the case to a human support agent with a summarized context.
-6. All interactions are logged, and an **analytics dashboard** displays key metrics such as response times, resolution rates, sentiment trends, and escalation frequency.
 
----
+1. A customer sends a support request through a webhook from a chat widget, email connector, or messaging channel.
+2. The intake classifier agent categorizes the message by topic and urgency.
+3. The sentiment analyzer agent scores the tone as positive, neutral, or negative.
+4. The orchestrator checks whether the message can be safely resolved from the FAQ knowledge base.
+5. If a confident FAQ match exists, the FAQ responder sends an automated reply.
+6. If the issue is complex, high urgency, or strongly negative, the escalation handler creates a ticket and prepares a summary for a human support agent.
+7. The system logs the interaction and updates dashboard metrics such as response time, resolution rate, and escalation frequency.
 
-## Features
-- **Intake Classifier Agent** to categorize incoming queries by topic and urgency
-- **FAQ Responder Agent** to handle common questions using a knowledge base
-- **Escalation Handler Agent** to route unresolved or sensitive issues to human support
-- **Sentiment Analyzer Agent** to detect customer mood and flag negative interactions
-- **Agent Orchestration Layer** to manage communication and handoffs between specialized agents
-- **Human-in-the-loop handoff** for complex or critical cases
-- **Webhook-based ticket intake** for website or email integration
-- **Conversation logging** for traceability and analytics
-- **Analytics dashboard** for monitoring support performance
-- **Customizable prompt templates** for each agent role
-- **Complete workflow architecture documentation**
+## Agent Roles
 
----
+### Intake Classifier Agent
+- Detects support topic such as billing, technical, account, or general inquiry
+- Assigns urgency level such as low, medium, or high
+- Provides structured metadata for downstream routing
+
+### Sentiment Analyzer Agent
+- Evaluates emotional tone of the message
+- Flags frustrated or high-risk conversations
+- Increases escalation priority for negative interactions
+
+### FAQ Responder Agent
+- Searches the knowledge base for common issues
+- Generates direct, concise, policy-safe responses
+- Resolves repetitive support queries without human intervention
+
+### Escalation Handler Agent
+- Takes over unresolved, sensitive, or high-risk cases
+- Creates a human handoff summary with customer context
+- Routes the issue to the right support queue or team
+
+### Orchestration Layer
+- Coordinates handoffs between specialized agents
+- Applies business rules for auto-resolution vs escalation
+- Ensures every interaction is logged consistently
+
+## Repository Structure
+
+```text
+.
+├── dashboard/
+│   └── app.py
+├── data/
+│   ├── faq.csv
+│   └── sample_queries.json
+├── docs/
+│   ├── api-spec.md
+│   ├── architecture.md
+│   ├── prompts.md
+│   └── test-cases.md
+├── flows/
+│   ├── flowise-chatflow-export.json
+│   └── n8n-workflow-export.json
+└── frontend/
+    └── src/App.jsx
+```
 
 ## Tech Stack
-- **n8n / Flowise** for agent orchestration
-- **Prompt Engineering** for agent behavior design
-- **Sentiment Analysis APIs** for mood detection
-- **Webhook Handling** for receiving support queries
-- **Knowledge Base / FAQ Store** for instant responses
-- **Dashboard / Logging Tools** for analytics and monitoring
 
----
+- `n8n` / `Flowise` for orchestration and agent chaining
+- Prompt engineering for role-specific agent behavior
+- Sentiment analysis APIs or LLM-based sentiment classification
+- Webhook handling for support query intake
+- React + Vite frontend for demo and presentation
+- Streamlit-ready Python dashboard starter for analytics
 
-## System Architecture
-The system is based on a **multi-agent architecture** where each agent performs a specialized role:
+## Milestones
 
-### 1. Intake Classifier Agent
-- Identifies query type such as billing, technical support, or general inquiry
-- Assigns urgency level
+### Milestone 1: Architecture and Agent Design
+- Define agent roles and responsibilities
+- Design multi-agent orchestration flow
+- Set up `n8n` / `Flowise` environment
+- Create FAQ knowledge base
+- Draft prompt templates
+- Document system architecture
 
-### 2. Sentiment Analyzer Agent
-- Detects emotional tone of the customer message
-- Flags negative or frustrated messages for special handling
+### Milestone 2: Core Agents
+- Build intake classifier agent
+- Implement FAQ responder with KB lookup
+- Set up webhook integration
+- Connect classifier to FAQ flow in `n8n` / `Flowise`
 
-### 3. FAQ Responder Agent
-- Checks whether the query matches a knowledge base entry
-- Generates instant automated responses for common issues
+### Milestone 3: Sentiment and Escalation
+- Add sentiment analyzer agent
+- Build escalation handler with human handoff
+- Connect all agents into full orchestration pipeline
+- Add interaction logging and baseline analytics
 
-### 4. Escalation Handler Agent
-- Handles cases that cannot be resolved automatically
-- Creates a support ticket
-- Passes relevant context to a human agent
+### Milestone 4: Dashboard, Testing, and Demo
+- Build analytics dashboard
+- Run end-to-end tests with diverse queries
+- Refine prompt templates for consistency
+- Finalize architecture documentation and demo walkthrough
 
-### 5. Orchestration Layer
-- Coordinates the flow between all agents
-- Decides whether a response should be automated or escalated
+## Local Setup
 
----
+### Frontend Demo
 
-## Analytics Dashboard
-The dashboard will track:
-- **Average response time**
-- **Resolution rate**
-- **Sentiment distribution**
-- **Escalation frequency**
-- **Agent-wise performance**
-- **Common support categories**
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
----
+The Vite app provides:
+- a support console simulation
+- a webhook payload preview
+- sample analytics cards and logs
+- a simplified architecture walkthrough for demos
 
-## Ethical Considerations
-- Automated responses should remain transparent and should not mislead users into thinking they are always interacting with a human.
-- Sensitive, emotional, or high-risk cases must be escalated to human agents.
-- Customer conversations must be stored securely to protect privacy.
-- The system should be regularly reviewed to minimize bias in classification and sentiment detection.
-- Human oversight is necessary to validate escalations and ensure fairness.
+### Dashboard Starter
 
----
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install streamlit pandas
+streamlit run dashboard/app.py
+```
 
-## Links
-- **GitHub Repository Link:** https://github.com/spy-in-shadows/agentic-customer-support-system
-- **Deployment Link:**
+### Workflow Assets
 
----
+Import these files into your tools:
+- `flows/n8n-workflow-export.json`
+- `flows/flowise-chatflow-export.json`
 
-## Future Improvements
-- Add multilingual support
-- Integrate with real ticketing platforms such as Zendesk or Freshdesk
-- Improve escalation logic using historical support data
-- Add customer satisfaction feedback collection
-- Enable learning from resolved tickets for smarter responses
+## Documentation
 
----
+- [Architecture](./docs/architecture.md)
+- [Prompt Templates](./docs/prompts.md)
+- [API Specification](./docs/api-spec.md)
+- [Test Cases](./docs/test-cases.md)
 
-## Authors
-**Krishna Verma**
-**Sambuddha Banerjee**
-**Aniruddha Dwivedi**
-**Atharv Bind**
+## Analytics Tracked
 
----
+The dashboard and logs are designed to track:
+- average response time
+- FAQ auto-resolution rate
+- escalation frequency
+- sentiment distribution
+- category-wise support volume
+- unresolved vs resolved ratio
+
+## Limitations and Ethical Considerations
+
+- Automated responses must be clearly represented as AI-generated when appropriate.
+- Sensitive, emotional, or ambiguous issues should be escalated rather than over-automated.
+- Customer data should be stored securely and handled under privacy-compliant practices.
+- Classification and sentiment models may introduce bias and require periodic review.
+- Human oversight is required to validate escalations and final outcomes.
+
+## Submission Checklist
+
+- GitHub repository link
+- Deployment link for frontend or dashboard
+- Workflow exports included
+- Architecture and prompt documentation included
+- Demo-ready sample data included
+
+## Project Status
+
+- Status: Good to go
+- Reviewed by: Ankur
+
+## Team
+
+- Krishna Verma
+- Sambuddha Banerjee
+- Aniruddha Dwivedi
+- Atharv Bind
+
+## Deployment
+
+Add your final links here before submission:
+- GitHub: `https://github.com/spy-in-shadows/agentic-customer-support-system`
+- Frontend deployment: `https://<your-demo-url>`
+- Dashboard deployment: `https://<your-dashboard-url>`
 
 ## License
-This project is for academic and demonstration purposes.
+
+This repository is intended for academic, demo, and portfolio use.

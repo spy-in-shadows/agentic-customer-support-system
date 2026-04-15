@@ -1,33 +1,33 @@
-question,answer,category
-How do I reset my password?,Click on "Forgot Password" on the login page and follow the instructions.,account
-I forgot my password, what should I do?,Use the "Forgot Password" option to reset your password via email.,account
-How can I change my email address?,Go to account settings and update your email in the profile section.,account
-How do I delete my account?,Please contact support or go to settings and select "Delete Account".,account
-How can I update my profile information?,Navigate to your account settings and edit your profile details.,account
-Can I have multiple accounts?,No, only one account per user is allowed.,account
-How do I enable two-factor authentication?,Go to security settings and enable 2FA for additional protection.,account
-Why am I unable to log in?,Check your credentials and ensure your account is active. Try resetting your password if needed.,account
-How do I update my billing information?,Go to account settings and open the billing section to update your payment method.,billing
-I was charged twice, what should I do?,Please contact support with your transaction details for a refund investigation.,billing
-How can I cancel my subscription?,Go to subscription settings and click "Cancel Subscription".,billing
-Will I get a refund after cancellation?,Refunds depend on our policy. Please check the refund terms or contact support.,billing
-Why did my payment fail?,Ensure your payment details are correct and that you have sufficient balance.,billing
-Can I change my subscription plan?,Yes, you can upgrade or downgrade your plan from the billing section.,billing
-Do you offer student discounts?,Yes, we offer discounts for students with valid verification.,billing
-How do I view my invoices?,Go to the billing section in your account to download your invoices.,billing
-Why is the app not loading?,Try refreshing the page, clearing cache, or checking your internet connection.,technical
-The app is crashing, how do I fix it?,Restart the app and ensure you are using the latest version.,technical
-Why am I seeing an error message?,Please note the error message and try again. Contact support if it persists.,technical
-The website is slow, what can I do?,Check your internet connection and try accessing during non-peak hours.,technical
-How do I update the app?,Visit the app store or website and download the latest version.,technical
-Features are not working properly, what should I do?,Try restarting the app or clearing cache. Contact support if the issue continues.,technical
-Why can't I upload files?,Check file size limits and supported formats before uploading.,technical
-Is the service down?,Check our status page or wait a few minutes and try again.,technical
-What services do you offer?,We provide various digital services including account management and support tools.,general
-How can I contact support?,You can reach support via email, chat, or help center.,general
-What are your working hours?,Our support team is available 24/7.,general
-Where can I find help documentation?,Visit our help center for detailed guides and tutorials.,general
-Do you have a mobile app?,Yes, our app is available on both Android and iOS platforms.,general
-How do I give feedback?,You can submit feedback through the app or contact support.,general
-Is my data सुरक्षित?,Yes, we follow strict security protocols to protect your data.,general
-Can I use your service internationally?,Yes, our services are available globally.,general
+id,question,answer,category
+FAQ-001,How do I reset my password?,Click on "Forgot Password" on the login page and follow the instructions.,account
+FAQ-002,I forgot my password, what should I do?,Use the "Forgot Password" option to reset your password via email.,account
+FAQ-003,How can I change my email address?,Go to account settings and update your email in the profile section.,account
+FAQ-004,How do I delete my account?,Please contact support or go to settings and select "Delete Account".,account
+FAQ-005,How can I update my profile information?,Navigate to your account settings and edit your profile details.,account
+FAQ-006,Can I have multiple accounts?,No, only one account per user is allowed.,account
+FAQ-007,How do I enable two-factor authentication?,Go to security settings and enable 2FA for additional protection.,account
+FAQ-008,Why am I unable to log in?,Check your credentials and ensure your account is active. Try resetting your password if needed.,account
+FAQ-009,How do I update my billing information?,Go to account settings and open the billing section to update your payment method.,billing
+FAQ-010,I was charged twice, what should I do?,Please contact support with your transaction details for a refund investigation.,billing
+FAQ-011,How can I cancel my subscription?,Go to subscription settings and click "Cancel Subscription".,billing
+FAQ-012,Will I get a refund after cancellation?,Refunds depend on our policy. Please check the refund terms or contact support.,billing
+FAQ-013,Why did my payment fail?,Ensure your payment details are correct and that you have sufficient balance.,billing
+FAQ-014,Can I change my subscription plan?,Yes, you can upgrade or downgrade your plan from the billing section.,billing
+FAQ-015,Do you offer student discounts?,Yes, we offer discounts for students with valid verification.,billing
+FAQ-016,How do I view my invoices?,Go to the billing section in your account to download your invoices.,billing
+FAQ-017,Why is the app not loading?,Try refreshing the page, clearing cache, or checking your internet connection.,technical
+FAQ-018,The app is crashing, how do I fix it?,Restart the app and ensure you are using the latest version.,technical
+FAQ-019,Why am I seeing an error message?,Please note the error message and try again. Contact support if it persists.,technical
+FAQ-020,The website is slow, what can I do?,Check your internet connection and try accessing during non-peak hours.,technical
+FAQ-021,How do I update the app?,Visit the app store or website and download the latest version.,technical
+FAQ-022,Features are not working properly, what should I do?,Try restarting the app or clearing cache. Contact support if the issue continues.,technical
+FAQ-023,Why can't I upload files?,Check file size limits and supported formats before uploading.,technical
+FAQ-024,Is the service down?,Check our status page or wait a few minutes and try again.,technical
+FAQ-025,What services do you offer?,We provide various digital services including account management and support tools.,general
+FAQ-026,How can I contact support?,You can reach support via email, chat, or help center.,general
+FAQ-027,What are your working hours?,Our support team is available 24/7.,general
+FAQ-028,Where can I find help documentation?,Visit our help center for detailed guides and tutorials.,general
+FAQ-029,Do you have a mobile app?,Yes, our app is available on both Android and iOS platforms.,general
+FAQ-030,How do I give feedback?,You can submit feedback through the app or contact support.,general
+FAQ-031,Is my data secure?,Yes, we follow strict security protocols to protect your data.,general
+FAQ-032,Can I use your service internationally?,Yes, our services are available globally.,general
