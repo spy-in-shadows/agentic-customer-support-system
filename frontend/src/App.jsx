@@ -10,23 +10,28 @@ import {
   Clock3,
   SmilePlus,
   MessageSquareMore,
+  PlugZap,
 } from "lucide-react";
+
+const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL?.trim() || "";
 
 const starterMessages = [
   {
     id: 1,
     role: "assistant",
-    text: "Hi! I’m your AI support assistant. Ask me about billing, account access, technical issues, or general queries.",
+    text: webhookUrl
+      ? "Hi! I’m your AI support assistant. This chat is connected to the configured n8n webhook."
+      : "Hi! I’m your AI support assistant. No webhook is configured yet, so this demo is using local fallback logic.",
     meta: null,
   },
 ];
 
 const sampleLogs = [
-  { id: "REQ-1001", category: "billing", sentiment: "negative", status: "escalated", responseTime: "14s" },
-  { id: "REQ-1002", category: "account", sentiment: "neutral", status: "resolved", responseTime: "5s" },
-  { id: "REQ-1003", category: "technical", sentiment: "negative", status: "escalated", responseTime: "18s" },
-  { id: "REQ-1004", category: "general", sentiment: "positive", status: "resolved", responseTime: "4s" },
-  { id: "REQ-1005", category: "billing", sentiment: "neutral", status: "resolved", responseTime: "7s" },
+  { id: "REQ-1001", category: "billing", sentiment: "negative", status: "escalated", responseTime: "14s", source: "demo" },
+  { id: "REQ-1002", category: "account", sentiment: "neutral", status: "resolved", responseTime: "5s", source: "demo" },
+  { id: "REQ-1003", category: "technical", sentiment: "negative", status: "escalated", responseTime: "18s", source: "demo" },
+  { id: "REQ-1004", category: "general", sentiment: "positive", status: "resolved", responseTime: "4s", source: "demo" },
+  { id: "REQ-1005", category: "billing", sentiment: "neutral", status: "resolved", responseTime: "7s", source: "demo" },
 ];
 
 function classifyLocally(query) {
@@ -38,23 +43,23 @@ function classifyLocally(query) {
   let answer = "Thanks for reaching out. Our support team will look into this.";
   let status = "resolved_by_faq";
 
-  if (["bill", "charged", "refund", "invoice", "payment", "subscription"].some((k) => q.includes(k))) {
+  if (["bill", "charged", "refund", "invoice", "payment", "subscription"].some((keyword) => q.includes(keyword))) {
     category = "billing";
-  } else if (["password", "login", "account", "email", "profile"].some((k) => q.includes(k))) {
+  } else if (["password", "login", "account", "email", "profile"].some((keyword) => q.includes(keyword))) {
     category = "account";
-  } else if (["crash", "error", "bug", "not loading", "slow", "upload", "down"].some((k) => q.includes(k))) {
+  } else if (["crash", "error", "bug", "not loading", "slow", "upload", "down"].some((keyword) => q.includes(keyword))) {
     category = "technical";
   }
 
-  if (["urgent", "immediately", "asap", "charged twice", "frustrated", "angry", "terrible", "unacceptable"].some((k) => q.includes(k))) {
+  if (["urgent", "immediately", "asap", "charged twice", "frustrated", "angry", "terrible", "unacceptable"].some((keyword) => q.includes(keyword))) {
     urgency = "high";
-  } else if (["issue", "problem", "help"].some((k) => q.includes(k))) {
+  } else if (["issue", "problem", "help"].some((keyword) => q.includes(keyword))) {
     urgency = "medium";
   }
 
-  if (["frustrated", "angry", "terrible", "bad", "worst", "unacceptable", "upset"].some((k) => q.includes(k))) {
+  if (["frustrated", "angry", "terrible", "bad", "worst", "unacceptable", "upset"].some((keyword) => q.includes(keyword))) {
     sentiment = "negative";
-  } else if (["thanks", "great", "awesome", "love"].some((k) => q.includes(k))) {
+  } else if (["thanks", "great", "awesome", "love"].some((keyword) => q.includes(keyword))) {
     sentiment = "positive";
   }
 
@@ -80,13 +85,19 @@ function classifyLocally(query) {
   }
 
   return {
+    request_id: `REQ-${Date.now()}`,
     category,
     urgency,
     sentiment,
-    matchedFaq,
+    matched_faq: matchedFaq,
+    escalated: status === "escalated_to_human",
     status,
-    answer,
-    ticketId: status === "escalated_to_human" ? `TICK-${Date.now()}` : "",
+    ticket_id: status === "escalated_to_human" ? `TICK-${Date.now()}` : "",
+    message:
+      status === "escalated_to_human"
+        ? `${answer}\n\nYour request has been escalated to a human support agent. Ticket ID: TICK-${Date.now()}.`
+        : answer,
+    source: "fallback",
   };
 }
 
@@ -107,8 +118,8 @@ function Badge({ children, variant = "default" }) {
     variant === "destructive"
       ? "bg-red-100 text-red-700 border-red-200"
       : variant === "secondary"
-      ? "bg-slate-100 text-slate-700 border-slate-200"
-      : "bg-slate-900 text-white border-slate-900";
+        ? "bg-slate-100 text-slate-700 border-slate-200"
+        : "bg-slate-900 text-white border-slate-900";
 
   return <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${styles}`}>{children}</span>;
 }
@@ -153,14 +164,42 @@ function MessageBubble({ message }) {
             <Badge variant="secondary">{message.meta.category}</Badge>
             <Badge variant="secondary">{message.meta.urgency}</Badge>
             <Badge variant="secondary">{message.meta.sentiment}</Badge>
-            <Badge variant={message.meta.status === "escalated_to_human" ? "destructive" : "default"}>
-              {message.meta.status === "escalated_to_human" ? "Escalated" : "Resolved"}
+            <Badge variant={message.meta.escalated ? "destructive" : "default"}>
+              {message.meta.escalated ? "Escalated" : "Resolved"}
             </Badge>
+            {message.meta.source && <Badge variant="secondary">{message.meta.source}</Badge>}
           </div>
         )}
       </div>
     </div>
   );
+}
+
+async function sendToWebhook(payload) {
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Webhook returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+function toLogEntry(result, elapsedMs) {
+  return {
+    id: result.request_id || `REQ-${Date.now()}`,
+    category: result.category || "general",
+    sentiment: result.sentiment || "neutral",
+    status: result.escalated ? "escalated" : "resolved",
+    responseTime: `${Math.max(1, Math.round(elapsedMs / 1000))}s`,
+    source: result.source || (webhookUrl ? "n8n" : "fallback"),
+  };
 }
 
 export default function App() {
@@ -170,17 +209,19 @@ export default function App() {
   const [customerId, setCustomerId] = useState("cust_001");
   const [logs, setLogs] = useState(sampleLogs);
   const [selectedTab, setSelectedTab] = useState("support");
+  const [isSending, setIsSending] = useState(false);
+  const [lastMode, setLastMode] = useState(webhookUrl ? "Webhook configured" : "Local fallback");
 
   const stats = useMemo(() => {
     const total = logs.length;
-    const escalated = logs.filter((l) => l.status === "escalated").length;
+    const escalated = logs.filter((log) => log.status === "escalated").length;
     const resolved = total - escalated;
-    const negative = logs.filter((l) => l.sentiment === "negative").length;
+    const negative = logs.filter((log) => log.sentiment === "negative").length;
     return { total, escalated, resolved, negative };
   }, [logs]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isSending) return;
 
     const userText = input.trim();
     const userMessage = {
@@ -190,36 +231,54 @@ export default function App() {
       meta: null,
     };
 
+    const payload = {
+      customer_id: customerId || "anonymous",
+      channel,
+      query: userText,
+    };
+
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsSending(true);
 
-    const result = classifyLocally(userText);
+    const startedAt = Date.now();
+    let result;
 
-    const assistantText =
-      result.status === "escalated_to_human"
-        ? `${result.answer}\n\nYour request has been escalated to a human support agent.${result.ticketId ? ` Ticket ID: ${result.ticketId}` : ""}`
-        : result.answer;
+    try {
+      if (!webhookUrl) {
+        throw new Error("Webhook not configured");
+      }
+
+      const webhookResult = await sendToWebhook(payload);
+      result = {
+        ...webhookResult,
+        escalated: Boolean(webhookResult.escalated),
+        source: "n8n",
+      };
+      setLastMode("Live n8n webhook");
+    } catch (error) {
+      result = classifyLocally(userText);
+      setLastMode(webhookUrl ? "Fallback after webhook error" : "Local fallback");
+      console.warn("Support workflow fallback triggered:", error);
+    } finally {
+      setIsSending(false);
+    }
 
     const assistantMessage = {
       id: Date.now() + 1,
       role: "assistant",
-      text: assistantText,
-      meta: result,
+      text: result.message,
+      meta: {
+        category: result.category || "general",
+        urgency: result.urgency || "medium",
+        sentiment: result.sentiment || "neutral",
+        escalated: Boolean(result.escalated),
+        source: result.source,
+      },
     };
 
-    setTimeout(() => {
-      setMessages((prev) => [...prev, assistantMessage]);
-      setLogs((prev) => [
-        {
-          id: `REQ-${Date.now()}`,
-          category: result.category,
-          sentiment: result.sentiment,
-          status: result.status === "escalated_to_human" ? "escalated" : "resolved",
-          responseTime: result.status === "escalated_to_human" ? "12s" : "5s",
-        },
-        ...prev,
-      ]);
-    }, 500);
+    setMessages((prev) => [...prev, assistantMessage]);
+    setLogs((prev) => [toLogEntry(result, Date.now() - startedAt), ...prev]);
   };
 
   return (
@@ -240,15 +299,15 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge>Groq + n8n</Badge>
+            <Badge>n8n orchestration</Badge>
             <Badge variant="secondary">Human-in-the-loop</Badge>
-            <Badge variant="secondary">Webhook-ready</Badge>
+            <Badge variant="secondary">{lastMode}</Badge>
           </div>
         </motion.div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard title="Total Queries" value={stats.total} icon={MessageSquareMore} hint="Logged support interactions" />
-          <StatCard title="FAQ Resolved" value={stats.resolved} icon={CheckCircle2} hint="Auto-resolved by AI" />
+          <StatCard title="FAQ Resolved" value={stats.resolved} icon={CheckCircle2} hint="Auto-resolved by workflow" />
           <StatCard title="Escalations" value={stats.escalated} icon={AlertTriangle} hint="Sent to human support" />
           <StatCard title="Negative Sentiment" value={stats.negative} icon={SmilePlus} hint="Flagged frustrated customers" />
         </div>
@@ -279,7 +338,9 @@ export default function App() {
             <Card className="xl:col-span-2">
               <CardHeader>
                 <h2 className="text-xl font-semibold">Customer Support Chat</h2>
-                <p className="text-sm text-slate-500">Use this as your demo support interface. Replace the local logic with your n8n webhook later.</p>
+                <p className="text-sm text-slate-500">
+                  Queries are sent to your configured n8n webhook when `VITE_N8N_WEBHOOK_URL` is present. If not, the demo falls back to local logic so the UI stays usable.
+                </p>
               </CardHeader>
 
               <CardContent className="space-y-4">
@@ -288,7 +349,7 @@ export default function App() {
                     <label className="text-sm font-medium">Customer ID</label>
                     <input
                       value={customerId}
-                      onChange={(e) => setCustomerId(e.target.value)}
+                      onChange={(event) => setCustomerId(event.target.value)}
                       placeholder="cust_001"
                       className="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-300"
                     />
@@ -298,7 +359,7 @@ export default function App() {
                     <label className="text-sm font-medium">Channel</label>
                     <select
                       value={channel}
-                      onChange={(e) => setChannel(e.target.value)}
+                      onChange={(event) => setChannel(event.target.value)}
                       className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-slate-300"
                     >
                       <option value="website_chat">Website Chat</option>
@@ -308,13 +369,13 @@ export default function App() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Quick Test</label>
-                    <button
-                      onClick={() => setInput("I was charged twice for my subscription and I am very frustrated.")}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium hover:bg-slate-200"
-                    >
-                      Load Escalation Case
-                    </button>
+                    <label className="text-sm font-medium">Connection</label>
+                    <div className="rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700">
+                      <span className="inline-flex items-center gap-2">
+                        <PlugZap className="h-4 w-4" />
+                        {webhookUrl ? "Webhook configured" : "Using local fallback"}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -327,14 +388,14 @@ export default function App() {
                 <div className="space-y-3">
                   <textarea
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(event) => setInput(event.target.value)}
                     placeholder="Type a support query like: How do I reset my password?"
                     className="min-h-[110px] w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300"
                   />
                   <div className="flex flex-wrap gap-2">
                     <button onClick={sendMessage} className="inline-flex items-center rounded-2xl bg-slate-900 px-5 py-2.5 text-white hover:bg-slate-800">
                       <Send className="mr-2 h-4 w-4" />
-                      Send Query
+                      {isSending ? "Sending..." : "Send Query"}
                     </button>
                     <button onClick={() => setInput("How do I reset my password?")} className="rounded-2xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50">
                       Password Reset
@@ -354,7 +415,7 @@ export default function App() {
               <Card>
                 <CardHeader>
                   <h2 className="text-xl font-semibold">Webhook Payload</h2>
-                  <p className="text-sm text-slate-500">Use this shape when connecting the UI to n8n.</p>
+                  <p className="text-sm text-slate-500">This is the request shape sent from the UI to n8n.</p>
                 </CardHeader>
                 <CardContent>
                   <pre className="overflow-x-auto rounded-2xl bg-slate-950 p-4 text-xs leading-6 text-slate-100">{`{
@@ -386,7 +447,7 @@ export default function App() {
             <Card className="xl:col-span-2">
               <CardHeader>
                 <h2 className="text-xl font-semibold">Recent Support Logs</h2>
-                <p className="text-sm text-slate-500">Live-style overview of support interactions.</p>
+                <p className="text-sm text-slate-500">Requests handled by the live webhook or local fallback path.</p>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -397,6 +458,7 @@ export default function App() {
                         <th className="py-3 pr-4">Category</th>
                         <th className="py-3 pr-4">Sentiment</th>
                         <th className="py-3 pr-4">Status</th>
+                        <th className="py-3 pr-4">Source</th>
                         <th className="py-3 pr-4">Response Time</th>
                       </tr>
                     </thead>
@@ -409,6 +471,7 @@ export default function App() {
                           <td className="py-3 pr-4">
                             <Badge variant={log.status === "escalated" ? "destructive" : "default"}>{log.status}</Badge>
                           </td>
+                          <td className="py-3 pr-4">{log.source}</td>
                           <td className="py-3 pr-4">{log.responseTime}</td>
                         </tr>
                       ))}
@@ -424,14 +487,14 @@ export default function App() {
                   <h2 className="text-xl font-semibold">Category Split</h2>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
-                  {["billing", "account", "technical", "general"].map((cat) => {
-                    const count = logs.filter((l) => l.category === cat).length;
+                  {["billing", "account", "technical", "general"].map((category) => {
+                    const count = logs.filter((log) => log.category === category).length;
                     const width = `${Math.max(8, (count / Math.max(logs.length, 1)) * 100)}%`;
 
                     return (
-                      <div key={cat} className="space-y-1">
+                      <div key={category} className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="capitalize">{cat}</span>
+                          <span className="capitalize">{category}</span>
                           <span>{count}</span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-slate-100">
@@ -448,9 +511,9 @@ export default function App() {
                   <h2 className="text-xl font-semibold">Operational Highlights</h2>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm text-slate-700">
-                  <div className="flex items-start gap-3"><Clock3 className="mt-0.5 h-4 w-4" /><span>Average response time is simulated for demo and should later come from n8n logs.</span></div>
-                  <div className="flex items-start gap-3"><BarChart3 className="mt-0.5 h-4 w-4" /><span>Escalation frequency rises for negative sentiment and high urgency cases.</span></div>
-                  <div className="flex items-start gap-3"><AlertTriangle className="mt-0.5 h-4 w-4" /><span>Human handoff keeps sensitive or unresolved cases from being over-automated.</span></div>
+                  <div className="flex items-start gap-3"><Clock3 className="mt-0.5 h-4 w-4" /><span>Response timing is measured from the UI request lifecycle so you can immediately see webhook latency.</span></div>
+                  <div className="flex items-start gap-3"><BarChart3 className="mt-0.5 h-4 w-4" /><span>Escalation frequency rises for negative sentiment, missing FAQ matches, and high urgency cases.</span></div>
+                  <div className="flex items-start gap-3"><AlertTriangle className="mt-0.5 h-4 w-4" /><span>Each request is labeled with `n8n` or `fallback` so demo traffic is easy to distinguish from live workflow traffic.</span></div>
                 </CardContent>
               </Card>
             </div>
@@ -461,16 +524,16 @@ export default function App() {
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">Workflow Architecture</h2>
-              <p className="text-sm text-slate-500">Simple end-to-end pipeline for your milestone demo.</p>
+              <p className="text-sm text-slate-500">The UI now targets the exported n8n orchestration workflow via a configurable webhook URL.</p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
                 {[
                   "Webhook Input",
-                  "Intake Classifier",
-                  "Sentiment Analyzer",
-                  "FAQ / Escalation Decision",
-                  "Logging + Dashboard",
+                  "Classifier + Sentiment",
+                  "FAQ Match",
+                  "Escalation Decision",
+                  "Respond + Log",
                 ].map((step, index) => (
                   <motion.div
                     key={step}
@@ -487,7 +550,7 @@ export default function App() {
 
               <div className="mt-6 rounded-2xl border bg-slate-100 p-5">
                 <p className="text-sm leading-7 text-slate-700">
-                  Customer query enters through a webhook. The intake classifier determines category and urgency, while the sentiment analyzer detects tone. If the issue matches an FAQ and is safe to auto-resolve, the system returns an answer. Otherwise, the escalation handler creates a human handoff. Every interaction is logged for analytics and dashboard reporting.
+                  The frontend posts each support query to n8n through a webhook. n8n normalizes the payload, runs classification and sentiment analysis, checks the FAQ matcher, decides whether to escalate, then returns the customer response while logging the interaction separately.
                 </p>
               </div>
             </CardContent>

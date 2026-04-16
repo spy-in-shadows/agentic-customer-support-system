@@ -133,12 +133,14 @@ Support teams spend significant time answering repetitive questions while also m
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
 The Vite app provides:
-- a support console simulation
+- a support console connected to n8n when `VITE_N8N_WEBHOOK_URL` is configured
 - a webhook payload preview
+- a local fallback path when the webhook is unavailable
 - sample analytics cards and logs
 - a simplified architecture walkthrough for demos
 
@@ -156,6 +158,10 @@ streamlit run dashboard/app.py
 Import these files into your tools:
 - `flows/n8n-workflow-export.json`
 - `flows/flowise-chatflow-export.json`
+
+For the exported n8n workflow:
+- set `GROQ_API_KEY` in your n8n environment before enabling the classifier and sentiment nodes
+- replace the placeholder Google Sheet id before enabling conversation logging
 
 ## Documentation
 

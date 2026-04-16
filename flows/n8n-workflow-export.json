@@ -1,0 +1,571 @@
+{
+  "name": "Agentic Customer Support System",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agentic-customer-support",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bbd9c077-02e4-4415-b7ea-6e4c59c0d4a6",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        576
+      ],
+      "webhookId": "agentic-customer-support-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "customer_id",
+              "value": "={{$json.body.customer_id || $json.customer_id || 'anonymous'}}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "={{$json.body.channel || $json.channel || 'web'}}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "customer_query",
+              "value": "={{$json.body.query || $json.query || $json.body.message || $json.message || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "timestamp",
+              "value": "={{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "request_id",
+              "value": "={{'REQ-' + Date.now()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e9ba0047-552f-4768-93cc-3200d3b47781",
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.GROQ_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.2,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an intake classifier for a customer support system. Classify the customer query into one of these categories only: billing, technical, account, general. Also assign urgency only as: low, medium, high. Return only valid JSON with keys category, urgency, reason.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Customer query: {{$json.customer_query}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "c0a42de8-ec0f-41a6-8623-b16268f0378f",
+      "name": "Intake Classifier Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.GROQ_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.2,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a sentiment analyzer for customer support. Classify the sentiment of the query as only one of: positive, neutral, negative. Return only valid JSON with keys sentiment and reason.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Customer query: {{$json.customer_query}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "84b8bd02-220e-45b2-9136-c6236742df46",
+      "name": "Sentiment Analyzer Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "a5c1328f-663d-483c-9793-5ed805e4497d",
+      "name": "Wait For Both Agents",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        544,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $('Normalize Input').first().json;\nconst classifierRaw = $('Intake Classifier Agent').first().json;\nconst sentimentRaw = $('Sentiment Analyzer Agent').first().json;\n\nlet classifier = {};\nlet sentiment = {};\n\ntry {\n  classifier = JSON.parse(classifierRaw.choices?.[0]?.message?.content || '{}');\n} catch (error) {\n  classifier = { category: 'general', urgency: 'medium', reason: 'classifier_parse_failed' };\n}\n\ntry {\n  sentiment = JSON.parse(sentimentRaw.choices?.[0]?.message?.content || '{}');\n} catch (error) {\n  sentiment = { sentiment: 'neutral', reason: 'sentiment_parse_failed' };\n}\n\nreturn [{\n  json: {\n    ...base,\n    category: classifier.category || 'general',\n    urgency: classifier.urgency || 'medium',\n    classifier_reason: classifier.reason || '',\n    sentiment: sentiment.sentiment || 'neutral',\n    sentiment_reason: sentiment.reason || ''\n  }\n}];"
+      },
+      "id": "77cc1485-481b-48b6-bf13-5bee9b022b2c",
+      "name": "Merge Agent Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst query = (item.customer_query || '').toLowerCase();\n\nconst faqs = [\n  { id: 'FAQ-001', question: 'reset password forgot password', answer: 'Click on \"Forgot Password\" on the login page and follow the instructions.', category: 'account' },\n  { id: 'FAQ-002', question: 'change email update email', answer: 'Go to account settings and update your email in the profile section.', category: 'account' },\n  { id: 'FAQ-003', question: 'delete account remove account', answer: 'Please contact support or go to settings and select \"Delete Account\".', category: 'account' },\n  { id: 'FAQ-004', question: 'update profile profile information', answer: 'Navigate to your account settings and edit your profile details.', category: 'account' },\n  { id: 'FAQ-005', question: 'multiple accounts more than one account', answer: 'No, only one account per user is allowed.', category: 'account' },\n  { id: 'FAQ-006', question: 'enable two factor authentication 2fa', answer: 'Go to security settings and enable 2FA for additional protection.', category: 'account' },\n  { id: 'FAQ-007', question: 'unable to log in cannot login login issue', answer: 'Check your credentials and ensure your account is active. Try resetting your password if needed.', category: 'account' },\n  { id: 'FAQ-008', question: 'update billing information payment method', answer: 'Go to account settings and open the billing section to update your payment method.', category: 'billing' },\n  { id: 'FAQ-009', question: 'charged twice duplicate charge double charge', answer: 'Please contact support with your transaction details for a refund investigation.', category: 'billing' },\n  { id: 'FAQ-010', question: 'cancel subscription cancel my plan', answer: 'Go to subscription settings and click \"Cancel Subscription\".', category: 'billing' },\n  { id: 'FAQ-011', question: 'refund after cancellation refund policy', answer: 'Refunds depend on our policy. Please check the refund terms or contact support.', category: 'billing' },\n  { id: 'FAQ-012', question: 'payment failed payment issue money deducted', answer: 'Ensure your payment details are correct and that you have sufficient balance.', category: 'billing' },\n  { id: 'FAQ-013', question: 'change subscription plan upgrade downgrade', answer: 'Yes, you can upgrade or downgrade your plan from the billing section.', category: 'billing' },\n  { id: 'FAQ-014', question: 'student discounts student discount', answer: 'Yes, we offer discounts for students with valid verification.', category: 'billing' },\n  { id: 'FAQ-015', question: 'view invoices invoices bill receipt', answer: 'Go to the billing section in your account to download your invoices.', category: 'billing' },\n  { id: 'FAQ-016', question: 'app not loading website not loading page not loading', answer: 'Try refreshing the page, clearing cache, or checking your internet connection.', category: 'technical' },\n  { id: 'FAQ-017', question: 'app crashing app crash website crashing', answer: 'Restart the app and ensure you are using the latest version.', category: 'technical' },\n  { id: 'FAQ-018', question: 'error message error code', answer: 'Please note the error message and try again. Contact support if it persists.', category: 'technical' },\n  { id: 'FAQ-019', question: 'website is slow app is slow slow loading', answer: 'Check your internet connection and try accessing during non-peak hours.', category: 'technical' },\n  { id: 'FAQ-020', question: 'update app latest version', answer: 'Visit the app store or website and download the latest version.', category: 'technical' },\n  { id: 'FAQ-021', question: 'features not working broken feature', answer: 'Try restarting the app or clearing cache. Contact support if the issue continues.', category: 'technical' },\n  { id: 'FAQ-022', question: 'cannot upload files upload issue file upload', answer: 'Check file size limits and supported formats before uploading.', category: 'technical' },\n  { id: 'FAQ-023', question: 'service down outage status', answer: 'Check our status page or wait a few minutes and try again.', category: 'technical' },\n  { id: 'FAQ-024', question: 'what services do you offer services', answer: 'We provide various digital services including account management and support tools.', category: 'general' },\n  { id: 'FAQ-025', question: 'contact support reach support', answer: 'You can reach support via email, chat, or help center.', category: 'general' },\n  { id: 'FAQ-026', question: 'working hours support hours', answer: 'Our support team is available 24/7.', category: 'general' },\n  { id: 'FAQ-027', question: 'help documentation help center guides', answer: 'Visit our help center for detailed guides and tutorials.', category: 'general' },\n  { id: 'FAQ-028', question: 'mobile app android ios app', answer: 'Yes, our app is available on both Android and iOS platforms.', category: 'general' },\n  { id: 'FAQ-029', question: 'give feedback submit feedback', answer: 'You can submit feedback through the app or contact support.', category: 'general' },\n  { id: 'FAQ-030', question: 'data secure privacy security', answer: 'Yes, we follow strict security protocols to protect your data.', category: 'general' },\n  { id: 'FAQ-031', question: 'internationally global worldwide', answer: 'Yes, our services are available globally.', category: 'general' }\n];\n\nfunction scoreFAQ(currentQuery, faqQuestion) {\n  const queryWords = currentQuery.split(/[^a-z0-9]+/).filter(Boolean);\n  const faqWords = faqQuestion.split(/[^a-z0-9]+/).filter(Boolean);\n  let score = 0;\n  for (const word of queryWords) {\n    if (faqWords.includes(word)) score += 1;\n  }\n  return score;\n}\n\nlet best = null;\nlet bestScore = 0;\nfor (const faq of faqs) {\n  const score = scoreFAQ(query, faq.question);\n  if (score > bestScore) {\n    best = faq;\n    bestScore = score;\n  }\n}\n\nconst matched_faq = Boolean(best && bestScore >= 2);\nconst faq_answer = matched_faq ? best.answer : '';\nconst faq_id = matched_faq ? best.id : '';\nconst faq_confidence = matched_faq ? (bestScore >= 3 ? 'high' : 'medium') : 'low';\n\nreturn [{\n  json: {\n    ...item,\n    matched_faq,\n    faq_answer,\n    faq_id,\n    faq_confidence\n  }\n}];"
+      },
+      "id": "a28586b7-7db6-4b82-afbc-256c21759c32",
+      "name": "FAQ Matcher",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst query = (item.customer_query || '').toLowerCase();\nconst negativeSignals = ['angry', 'frustrated', 'refund', 'complaint', 'charged twice', 'urgent', 'not working', 'terrible', 'bad service', 'cancel immediately', 'money deducted'];\nconst hasNegativeSignal = negativeSignals.some((word) => query.includes(word));\n\nconst escalate = (\n  item.matched_faq === false ||\n  item.urgency === 'high' ||\n  item.sentiment === 'negative' ||\n  hasNegativeSignal\n);\n\nlet summary = `Customer query: ${item.customer_query}. Category: ${item.category}. Urgency: ${item.urgency}. Sentiment: ${item.sentiment}.`;\nif (!item.matched_faq) summary += ' No FAQ match found.';\n\nreturn [{\n  json: {\n    ...item,\n    escalate,\n    escalation_reason: escalate\n      ? 'Complex, urgent, negative, or unmatched query requiring human review'\n      : 'FAQ matched and safe to auto-resolve',\n    summary_for_human: summary\n  }\n}];"
+      },
+      "id": "429f104f-08b6-4cc1-8032-940d1d208132",
+      "name": "Escalation Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.escalate}}",
+              "operation": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2c135533-1b70-4bea-8a82-0d117b673788",
+      "name": "Should Escalate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "final_status",
+              "value": "resolved_by_faq",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "escalated",
+              "value": "={{false}}",
+              "type": "boolean"
+            },
+            {
+              "id": "b3",
+              "name": "ticket_id",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "b4",
+              "name": "response_text",
+              "value": "={{$json.faq_answer}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "260153ef-407d-419b-a16d-0af4d77cdcb0",
+      "name": "Build FAQ Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1664,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst ticketId = 'TICK-' + Date.now();\nreturn [{\n  json: {\n    ...item,\n    final_status: 'escalated_to_human',\n    escalated: true,\n    ticket_id: ticketId,\n    response_text: `Your request has been escalated to a human support agent. Ticket ID: ${ticketId}. Our team will review it shortly.`\n  }\n}];"
+      },
+      "id": "72bfebcb-bc4c-4e27-8093-5ab61650cf35",
+      "name": "Build Escalation Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "l1",
+              "name": "request_id",
+              "value": "={{$json.request_id}}",
+              "type": "string"
+            },
+            {
+              "id": "l2",
+              "name": "customer_id",
+              "value": "={{$json.customer_id}}",
+              "type": "string"
+            },
+            {
+              "id": "l3",
+              "name": "channel",
+              "value": "={{$json.channel}}",
+              "type": "string"
+            },
+            {
+              "id": "l4",
+              "name": "query",
+              "value": "={{$json.customer_query}}",
+              "type": "string"
+            },
+            {
+              "id": "l5",
+              "name": "category",
+              "value": "={{$json.category}}",
+              "type": "string"
+            },
+            {
+              "id": "l6",
+              "name": "urgency",
+              "value": "={{$json.urgency}}",
+              "type": "string"
+            },
+            {
+              "id": "l7",
+              "name": "sentiment",
+              "value": "={{$json.sentiment}}",
+              "type": "string"
+            },
+            {
+              "id": "l8",
+              "name": "matched_faq",
+              "value": "={{$json.matched_faq}}",
+              "type": "boolean"
+            },
+            {
+              "id": "l9",
+              "name": "faq_id",
+              "value": "={{$json.faq_id}}",
+              "type": "string"
+            },
+            {
+              "id": "l10",
+              "name": "status",
+              "value": "={{$json.final_status}}",
+              "type": "string"
+            },
+            {
+              "id": "l11",
+              "name": "ticket_id",
+              "value": "={{$json.ticket_id}}",
+              "type": "string"
+            },
+            {
+              "id": "l12",
+              "name": "timestamp",
+              "value": "={{$json.timestamp}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "57ac1b94-a3b9-4038-81d4-0e287b92ad40",
+      "name": "Prepare Log Row",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1888,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"request_id\": $json.request_id,\n  \"status\": $json.final_status,\n  \"category\": $json.category,\n  \"urgency\": $json.urgency,\n  \"sentiment\": $json.sentiment,\n  \"matched_faq\": $json.matched_faq,\n  \"faq_id\": $json.faq_id,\n  \"escalated\": $json.escalated,\n  \"ticket_id\": $json.ticket_id,\n  \"message\": $json.response_text\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "23ccc1c2-5a45-4158-a57f-07db84fb74f8",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.3,
+      "position": [
+        1888,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "replace-with-your-google-sheet-id",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "request_id": "={{$json.request_id}}",
+            "customer_id": "={{$json.customer_id}}",
+            "channel": "={{$json.channel}}",
+            "query": "={{$json.customer_query}}",
+            "category": "={{$json.category}}",
+            "urgency": "={{$json.urgency}}",
+            "sentiment": "={{$json.sentiment}}",
+            "matched_faq": "={{$json.matched_faq}}",
+            "faq_id": "={{$json.faq_id}}",
+            "status": "={{$json.final_status}}",
+            "ticket_id": "={{$json.ticket_id}}",
+            "timestamp": "={{$json.timestamp}}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "684751df-b71c-4c73-afed-0a4e71744a64",
+      "name": "Log Conversation",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2112,
+        704
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Intake Classifier Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sentiment Analyzer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intake Classifier Agent": {
+      "main": [
+        [
+          {
+            "node": "Wait For Both Agents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analyzer Agent": {
+      "main": [
+        [
+          {
+            "node": "Wait For Both Agents",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait For Both Agents": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Agent Results": {
+      "main": [
+        [
+          {
+            "node": "FAQ Matcher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ Matcher": {
+      "main": [
+        [
+          {
+            "node": "Escalation Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalation Logic": {
+      "main": [
+        [
+          {
+            "node": "Should Escalate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Escalate?": {
+      "main": [
+        [
+          {
+            "node": "Build Escalation Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build FAQ Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build FAQ Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Log Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Escalation Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Log Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Log Row": {
+      "main": [
+        [
+          {
+            "node": "Log Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -7,7 +7,7 @@ This document defines the recommended webhook contract for support intake and th
 ### Endpoint
 
 ```text
-POST /webhook/support
+POST /webhook/agentic-customer-support
 ```
 
 ### Content Type
@@ -49,7 +49,7 @@ After intake validation, the orchestration layer can enrich the message into a s
   "request_id": "REQ-1001",
   "customer_id": "cust_001",
   "channel": "website_chat",
-  "query": "I was charged twice for my subscription and I need help immediately.",
+  "customer_query": "I was charged twice for my subscription and I need help immediately.",
   "classifier": {
     "category": "billing",
     "urgency": "high",
@@ -76,11 +76,16 @@ After intake validation, the orchestration layer can enrich the message into a s
 
 ```json
 {
-  "status": "resolved",
+  "status": "resolved_by_faq",
   "request_id": "REQ-1002",
-  "response_type": "faq",
-  "customer_reply": "Click on \"Forgot Password\" on the login page and follow the reset instructions sent to your email.",
-  "matched_faq_id": "FAQ-001"
+  "category": "account",
+  "urgency": "low",
+  "sentiment": "neutral",
+  "matched_faq": true,
+  "faq_id": "FAQ-001",
+  "escalated": false,
+  "ticket_id": "",
+  "message": "Click on \"Forgot Password\" on the login page and follow the reset instructions sent to your email."
 }
 ```
 
@@ -88,20 +93,22 @@ After intake validation, the orchestration layer can enrich the message into a s
 
 ```json
 {
-  "status": "escalated",
+  "status": "escalated_to_human",
   "request_id": "REQ-1003",
-  "response_type": "human_handoff",
+  "category": "billing",
+  "urgency": "high",
+  "sentiment": "negative",
+  "matched_faq": false,
+  "faq_id": "",
+  "escalated": true,
   "ticket_id": "TICK-784512",
-  "customer_reply": "I’m sorry you’re facing this issue. I’ve escalated it to a human support agent who will review it shortly.",
-  "priority": "high",
-  "queue": "billing"
+  "message": "Your request has been escalated to a human support agent. Ticket ID: TICK-784512. Our team will review it shortly."
 }
 ```
 
 ## 5. Suggested Status Codes
 
 - `200`: request accepted and resolved
-- `202`: request accepted and escalated asynchronously
 - `400`: invalid request payload
 - `500`: workflow or downstream agent failure
 
