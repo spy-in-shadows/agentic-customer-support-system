@@ -18,11 +18,17 @@ Intake Classifier ---------> Sentiment Analyzer
     +------------+---------------+
                  |
                  v
-         Orchestration Decision
-           /                \
-          /                  \
-         v                    v
- FAQ Responder         Escalation Handler
+      Knowledge Retrieval
+             |
+             v
+     Grounded FAQ Responder
+             |
+             v
+      Orchestration Decision
+        /                \
+       /                  \
+      v                    v
+ FAQ Response       Escalation Handler
          |                    |
          +----------+---------+
                     |
@@ -71,22 +77,37 @@ Typical outputs:
 
 Negative sentiment does not always require escalation, but it should influence routing rules.
 
-### 4. FAQ Responder Agent
+### 4. Retrieval Layer
 
 Purpose:
-- handle repetitive, low-risk queries using a predefined FAQ knowledge base
+- retrieve the most relevant support knowledge for the incoming query
+- narrow the context before answer generation
+
+In this project, retrieval is implemented as a lightweight in-workflow knowledge search over support documents. The top-scoring documents are passed into the grounded responder.
+
+Typical outputs:
+- `retrieval_context`
+- `retrieval_top_score`
+- `retrieval_has_candidate`
+
+### 5. Grounded FAQ Responder Agent
+
+Purpose:
+- answer repetitive, low-risk queries only from retrieved support knowledge
 
 FAQ resolution is appropriate when:
-- the query maps confidently to a known answer
+- the retriever finds relevant context
+- the grounded responder confirms the context safely answers the query
 - the issue is not sensitive or high urgency
 - no policy exception is triggered
 
-This agent should return:
+This agent returns:
 - the response text
 - the matched FAQ identifier
-- confidence score or match rationale
+- confidence score
+- rationale for grounded matching
 
-### 5. Escalation Handler Agent
+### 6. Escalation Handler Agent
 
 Purpose:
 - route unresolved or risky cases to a human support queue
@@ -104,7 +125,7 @@ Outputs:
 - escalation priority
 - customer-facing holding response
 
-### 6. Orchestration Layer
+### 7. Orchestration Layer
 
 The orchestration layer in `n8n` or `Flowise` coordinates all agents and business rules.
 
@@ -118,13 +139,14 @@ Main responsibilities:
 ## Suggested Decision Logic
 
 Auto-resolve when all conditions are true:
-- FAQ match confidence is above threshold
+- retrieval returns relevant support context
+- grounded FAQ confidence is above threshold
 - urgency is not high
 - sentiment is not strongly negative
 - query does not involve protected or sensitive actions
 
 Escalate when any of these conditions are true:
-- no FAQ match
+- no grounded FAQ answer
 - sentiment is negative and confidence is high
 - urgency is high
 - request involves refunds, payment disputes, legal issues, or account compromise
@@ -141,6 +163,7 @@ Derived fields:
 - topic category
 - urgency
 - sentiment
+- retrieved context
 - matched FAQ
 - escalation decision
 - final response
@@ -159,7 +182,7 @@ The escalation summary should include:
 - category and urgency
 - sentiment assessment
 - suggested next action
-- any FAQ attempt already made
+- any retrieval or FAQ attempt already made
 
 ## Logging and Analytics
 

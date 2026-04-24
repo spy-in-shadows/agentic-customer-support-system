@@ -48,38 +48,46 @@ Analyze the sentiment of this message:
 {{customer_query}}
 ```
 
-## 3. FAQ Responder Agent
+## 3. Retrieval Step
+
+The retrieval step in the current workflow is implemented as code-based knowledge search rather than an LLM prompt. It scores support documents, selects the top context, and passes that context into the grounded responder.
+
+## 4. Grounded FAQ Responder Agent
 
 ### System Prompt
 
 ```text
-You are an FAQ support assistant.
-Use only the provided knowledge base entries.
-If a confident answer exists, return a JSON object with:
+You are a grounded FAQ responder for a customer support system.
+Use only the retrieved support context provided to you.
+If the context safely answers the customer query, return a JSON object with:
 - matched: true
-- faq_id: matched record id
+- faq_id: matched document id
 - answer: concise customer-facing answer
+- confidence: one of low, medium, high
+- rationale: short explanation
 
 If no confident answer exists, return:
 - matched: false
 - faq_id: ""
 - answer: ""
+- confidence: "low"
+- rationale: short reason
 
-Do not invent policies or troubleshooting steps that are not in the knowledge base.
+Do not invent policies or troubleshooting steps that are not in the retrieved context.
 Return only valid JSON.
 ```
 
 ### User Prompt Template
 
 ```text
-Knowledge base:
-{{faq_context}}
+Retrieved support context:
+{{retrieval_context}}
 
 Customer message:
 {{customer_query}}
 ```
 
-## 4. Escalation Handler Agent
+## 5. Escalation Handler Agent
 
 ### System Prompt
 
@@ -109,11 +117,11 @@ Classifier output:
 Sentiment output:
 {{sentiment_output}}
 
-FAQ result:
-{{faq_output}}
+RAG result:
+{{rag_output}}
 ```
 
-## 5. Orchestrator Decision Prompt
+## 6. Orchestrator Decision Prompt
 
 ### System Prompt
 
@@ -125,7 +133,7 @@ Return JSON with:
 - rationale: short explanation
 
 Escalate if:
-- FAQ matched is false
+- grounded FAQ matched is false
 - urgency is high
 - sentiment is negative with risk_flag true
 - the issue appears sensitive, ambiguous, or high impact
@@ -138,4 +146,4 @@ Return only valid JSON.
 - Keep outputs structured to simplify downstream parsing.
 - Separate empathy-heavy prompts from classification prompts.
 - Use strict labels and enums to prevent inconsistent orchestration behavior.
-- Add guardrails so the FAQ responder never fabricates unsupported answers.
+- Add guardrails so the grounded responder never fabricates unsupported answers.

@@ -158,10 +158,10 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst query = (item.customer_query || '').toLowerCase();\n\nconst faqs = [\n  { id: 'FAQ-001', question: 'reset password forgot password', answer: 'Click on \"Forgot Password\" on the login page and follow the instructions.', category: 'account' },\n  { id: 'FAQ-002', question: 'change email update email', answer: 'Go to account settings and update your email in the profile section.', category: 'account' },\n  { id: 'FAQ-003', question: 'delete account remove account', answer: 'Please contact support or go to settings and select \"Delete Account\".', category: 'account' },\n  { id: 'FAQ-004', question: 'update profile profile information', answer: 'Navigate to your account settings and edit your profile details.', category: 'account' },\n  { id: 'FAQ-005', question: 'multiple accounts more than one account', answer: 'No, only one account per user is allowed.', category: 'account' },\n  { id: 'FAQ-006', question: 'enable two factor authentication 2fa', answer: 'Go to security settings and enable 2FA for additional protection.', category: 'account' },\n  { id: 'FAQ-007', question: 'unable to log in cannot login login issue', answer: 'Check your credentials and ensure your account is active. Try resetting your password if needed.', category: 'account' },\n  { id: 'FAQ-008', question: 'update billing information payment method', answer: 'Go to account settings and open the billing section to update your payment method.', category: 'billing' },\n  { id: 'FAQ-009', question: 'charged twice duplicate charge double charge', answer: 'Please contact support with your transaction details for a refund investigation.', category: 'billing' },\n  { id: 'FAQ-010', question: 'cancel subscription cancel my plan', answer: 'Go to subscription settings and click \"Cancel Subscription\".', category: 'billing' },\n  { id: 'FAQ-011', question: 'refund after cancellation refund policy', answer: 'Refunds depend on our policy. Please check the refund terms or contact support.', category: 'billing' },\n  { id: 'FAQ-012', question: 'payment failed payment issue money deducted', answer: 'Ensure your payment details are correct and that you have sufficient balance.', category: 'billing' },\n  { id: 'FAQ-013', question: 'change subscription plan upgrade downgrade', answer: 'Yes, you can upgrade or downgrade your plan from the billing section.', category: 'billing' },\n  { id: 'FAQ-014', question: 'student discounts student discount', answer: 'Yes, we offer discounts for students with valid verification.', category: 'billing' },\n  { id: 'FAQ-015', question: 'view invoices invoices bill receipt', answer: 'Go to the billing section in your account to download your invoices.', category: 'billing' },\n  { id: 'FAQ-016', question: 'app not loading website not loading page not loading', answer: 'Try refreshing the page, clearing cache, or checking your internet connection.', category: 'technical' },\n  { id: 'FAQ-017', question: 'app crashing app crash website crashing', answer: 'Restart the app and ensure you are using the latest version.', category: 'technical' },\n  { id: 'FAQ-018', question: 'error message error code', answer: 'Please note the error message and try again. Contact support if it persists.', category: 'technical' },\n  { id: 'FAQ-019', question: 'website is slow app is slow slow loading', answer: 'Check your internet connection and try accessing during non-peak hours.', category: 'technical' },\n  { id: 'FAQ-020', question: 'update app latest version', answer: 'Visit the app store or website and download the latest version.', category: 'technical' },\n  { id: 'FAQ-021', question: 'features not working broken feature', answer: 'Try restarting the app or clearing cache. Contact support if the issue continues.', category: 'technical' },\n  { id: 'FAQ-022', question: 'cannot upload files upload issue file upload', answer: 'Check file size limits and supported formats before uploading.', category: 'technical' },\n  { id: 'FAQ-023', question: 'service down outage status', answer: 'Check our status page or wait a few minutes and try again.', category: 'technical' },\n  { id: 'FAQ-024', question: 'what services do you offer services', answer: 'We provide various digital services including account management and support tools.', category: 'general' },\n  { id: 'FAQ-025', question: 'contact support reach support', answer: 'You can reach support via email, chat, or help center.', category: 'general' },\n  { id: 'FAQ-026', question: 'working hours support hours', answer: 'Our support team is available 24/7.', category: 'general' },\n  { id: 'FAQ-027', question: 'help documentation help center guides', answer: 'Visit our help center for detailed guides and tutorials.', category: 'general' },\n  { id: 'FAQ-028', question: 'mobile app android ios app', answer: 'Yes, our app is available on both Android and iOS platforms.', category: 'general' },\n  { id: 'FAQ-029', question: 'give feedback submit feedback', answer: 'You can submit feedback through the app or contact support.', category: 'general' },\n  { id: 'FAQ-030', question: 'data secure privacy security', answer: 'Yes, we follow strict security protocols to protect your data.', category: 'general' },\n  { id: 'FAQ-031', question: 'internationally global worldwide', answer: 'Yes, our services are available globally.', category: 'general' }\n];\n\nfunction scoreFAQ(currentQuery, faqQuestion) {\n  const queryWords = currentQuery.split(/[^a-z0-9]+/).filter(Boolean);\n  const faqWords = faqQuestion.split(/[^a-z0-9]+/).filter(Boolean);\n  let score = 0;\n  for (const word of queryWords) {\n    if (faqWords.includes(word)) score += 1;\n  }\n  return score;\n}\n\nlet best = null;\nlet bestScore = 0;\nfor (const faq of faqs) {\n  const score = scoreFAQ(query, faq.question);\n  if (score > bestScore) {\n    best = faq;\n    bestScore = score;\n  }\n}\n\nconst matched_faq = Boolean(best && bestScore >= 2);\nconst faq_answer = matched_faq ? best.answer : '';\nconst faq_id = matched_faq ? best.id : '';\nconst faq_confidence = matched_faq ? (bestScore >= 3 ? 'high' : 'medium') : 'low';\n\nreturn [{\n  json: {\n    ...item,\n    matched_faq,\n    faq_answer,\n    faq_id,\n    faq_confidence\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\nconst query = (item.customer_query || '').toLowerCase();\n\nconst knowledgeBase = [\n  { id: 'FAQ-001', category: 'account', title: 'How do I reset my password', content: 'Question: How do I reset my password? Answer: Click Forgot Password on the login page and follow the instructions sent to your email.' },\n  { id: 'FAQ-002', category: 'account', title: 'I forgot my password. What should I do', content: 'Question: I forgot my password. What should I do? Answer: Use the Forgot Password option to reset your password by email.' },\n  { id: 'FAQ-003', category: 'account', title: 'How can I change my email address', content: 'Question: How can I change my email address? Answer: Go to account settings and update your email in the profile section.' },\n  { id: 'FAQ-004', category: 'account', title: 'How do I delete my account', content: 'Question: How do I delete my account? Answer: Open settings and choose Delete Account or contact support for help.' },\n  { id: 'FAQ-005', category: 'account', title: 'How can I update my profile information', content: 'Question: How can I update my profile information? Answer: Go to account settings and edit your profile details.' },\n  { id: 'FAQ-006', category: 'account', title: 'Can I have multiple accounts', content: 'Question: Can I have multiple accounts? Answer: Only one account per user is allowed unless your plan explicitly supports multi-user access.' },\n  { id: 'FAQ-007', category: 'account', title: 'How do I enable two-factor authentication', content: 'Question: How do I enable two-factor authentication? Answer: Open security settings and enable two-factor authentication for extra protection.' },\n  { id: 'FAQ-008', category: 'account', title: 'Why am I unable to log in', content: 'Question: Why am I unable to log in? Answer: Check your credentials and make sure your account is active. Reset your password if needed.' },\n  { id: 'FAQ-009', category: 'billing', title: 'How do I update my billing information', content: 'Question: How do I update my billing information? Answer: Open account settings and go to Billing to update your payment method.' },\n  { id: 'FAQ-010', category: 'billing', title: 'I was charged twice. What should I do', content: 'Question: I was charged twice. What should I do? Answer: Please contact support with your transaction details so we can investigate the duplicate charge.' },\n  { id: 'FAQ-011', category: 'billing', title: 'How can I cancel my subscription', content: 'Question: How can I cancel my subscription? Answer: Open subscription settings and click Cancel Subscription.' },\n  { id: 'FAQ-012', category: 'billing', title: 'Will I get a refund after cancellation', content: 'Question: Will I get a refund after cancellation? Answer: Refunds depend on our refund policy and billing terms.' },\n  { id: 'FAQ-013', category: 'billing', title: 'Why did my payment fail', content: 'Question: Why did my payment fail? Answer: Check that your payment details are correct and that your card or balance is valid.' },\n  { id: 'FAQ-014', category: 'billing', title: 'Can I change my subscription plan', content: 'Question: Can I change my subscription plan? Answer: Yes. You can upgrade or downgrade your plan from the billing section.' },\n  { id: 'FAQ-015', category: 'billing', title: 'Do you offer student discounts', content: 'Question: Do you offer student discounts? Answer: Yes. Student discounts are available after successful verification.' },\n  { id: 'FAQ-016', category: 'billing', title: 'How do I view my invoices', content: 'Question: How do I view my invoices? Answer: Go to the billing section in your account to download your invoices.' },\n  { id: 'FAQ-017', category: 'technical', title: 'Why is the app not loading', content: 'Question: Why is the app not loading? Answer: Try refreshing the page clearing cache or checking your internet connection.' },\n  { id: 'FAQ-018', category: 'technical', title: 'The app is crashing. How do I fix it', content: 'Question: The app is crashing. How do I fix it? Answer: Restart the app and make sure you are using the latest version.' },\n  { id: 'FAQ-019', category: 'technical', title: 'Why am I seeing an error message', content: 'Question: Why am I seeing an error message? Answer: Note the error message and try again. Contact support if it continues.' },\n  { id: 'FAQ-020', category: 'technical', title: 'The website is slow. What can I do', content: 'Question: The website is slow. What can I do? Answer: Check your internet connection and try again during non-peak hours.' },\n  { id: 'FAQ-021', category: 'technical', title: 'How do I update the app', content: 'Question: How do I update the app? Answer: Visit the app store or website and install the latest version.' },\n  { id: 'FAQ-022', category: 'technical', title: 'Features are not working properly. What should I do', content: 'Question: Features are not working properly. What should I do? Answer: Try restarting the app or clearing cache. Contact support if the issue continues.' },\n  { id: 'FAQ-023', category: 'technical', title: 'Why can\\'t I upload files', content: 'Question: Why can\\'t I upload files? Answer: Check file size limits and supported formats before uploading.' },\n  { id: 'FAQ-024', category: 'technical', title: 'Is the service down', content: 'Question: Is the service down? Answer: Check our status page or try again after a few minutes.' },\n  { id: 'FAQ-025', category: 'general', title: 'What services do you offer', content: 'Question: What services do you offer? Answer: We provide digital services including account management support tools and workflow automation features.' },\n  { id: 'FAQ-026', category: 'general', title: 'How can I contact support', content: 'Question: How can I contact support? Answer: You can contact support through email chat or the help center.' },\n  { id: 'FAQ-027', category: 'general', title: 'What are your working hours', content: 'Question: What are your working hours? Answer: Our support team is available 24 hours a day and 7 days a week.' },\n  { id: 'FAQ-028', category: 'general', title: 'Where can I find help documentation', content: 'Question: Where can I find help documentation? Answer: Visit our help center for step-by-step guides and documentation.' },\n  { id: 'FAQ-029', category: 'general', title: 'Do you have a mobile app', content: 'Question: Do you have a mobile app? Answer: Yes. Our mobile app is available on Android and iOS.' },\n  { id: 'FAQ-030', category: 'general', title: 'How do I give feedback', content: 'Question: How do I give feedback? Answer: You can submit feedback through the app or by contacting support.' },\n  { id: 'FAQ-031', category: 'general', title: 'Is my data secure', content: 'Question: Is my data secure? Answer: Yes. We use security controls to protect customer data.' },\n  { id: 'FAQ-032', category: 'general', title: 'Can I use your service internationally', content: 'Question: Can I use your service internationally? Answer: Yes. Our services are available globally unless local regulations restrict access.' },\n  { id: 'FAQ-033', category: 'account', title: 'How do I change my username', content: 'Question: How do I change my username? Answer: Go to profile settings and update your display name if your plan allows it.' },\n  { id: 'FAQ-034', category: 'account', title: 'Can I change my account ID', content: 'Question: Can I change my account ID? Answer: Account IDs are fixed for security and audit reasons and usually cannot be changed.' },\n  { id: 'FAQ-035', category: 'account', title: 'How do I verify my email address', content: 'Question: How do I verify my email address? Answer: Open the verification email we sent and click the confirmation link.' },\n  { id: 'FAQ-036', category: 'account', title: 'I did not receive the verification email. What should I do', content: 'Question: I did not receive the verification email. What should I do? Answer: Check spam or promotions folders and request a new verification email from account settings.' },\n  { id: 'FAQ-037', category: 'account', title: 'How do I resend the verification email', content: 'Question: How do I resend the verification email? Answer: Use the resend verification option in account settings or on the login screen.' },\n  { id: 'FAQ-038', category: 'account', title: 'Can I sign in with Google', content: 'Question: Can I sign in with Google? Answer: If social login is enabled on your workspace you can sign in with Google from the login page.' },\n  { id: 'FAQ-039', category: 'account', title: 'Can I sign in with Apple', content: 'Question: Can I sign in with Apple? Answer: If Apple sign-in is enabled you can use it from the login page.' },\n  { id: 'FAQ-040', category: 'account', title: 'Can I sign in with Microsoft', content: 'Question: Can I sign in with Microsoft? Answer: If Microsoft sign-in is enabled you can use it from the login page.' },\n  { id: 'FAQ-041', category: 'account', title: 'How do I log out from all devices', content: 'Question: How do I log out from all devices? Answer: Open security settings and choose the option to sign out from all sessions.' },\n  { id: 'FAQ-042', category: 'account', title: 'How do I see active sessions', content: 'Question: How do I see active sessions? Answer: Go to security settings to review your active sessions and connected devices.' },\n  { id: 'FAQ-043', category: 'account', title: 'How do I remove a device from my account', content: 'Question: How do I remove a device from my account? Answer: Open active sessions in security settings and revoke the device you no longer trust.' },\n  { id: 'FAQ-044', category: 'account', title: 'My account is locked. How do I unlock it', content: 'Question: My account is locked. How do I unlock it? Answer: Wait for the lockout period to end or contact support if you need manual review.' },\n  { id: 'FAQ-045', category: 'account', title: 'Why was my account suspended', content: 'Question: Why was my account suspended? Answer: Accounts may be suspended for policy or security reasons. Contact support for review details.' },\n  { id: 'FAQ-046', category: 'account', title: 'How do I reactivate my account', content: 'Question: How do I reactivate my account? Answer: Sign in and follow the reactivation steps or contact support if reactivation is unavailable.' },\n  { id: 'FAQ-047', category: 'account', title: 'How do I update my phone number', content: 'Question: How do I update my phone number? Answer: Open account settings and update your phone number in the profile or security section.' },\n  { id: 'FAQ-048', category: 'account', title: 'How do I add a recovery email', content: 'Question: How do I add a recovery email? Answer: Go to account security settings and add a backup recovery email.' },\n  { id: 'FAQ-049', category: 'account', title: 'How do I add a backup phone number', content: 'Question: How do I add a backup phone number? Answer: Open security settings and add a recovery phone number if the feature is enabled.' },\n  { id: 'FAQ-050', category: 'account', title: 'How do I change my password after signing in', content: 'Question: How do I change my password after signing in? Answer: Open security settings and choose Change Password.' },\n  { id: 'FAQ-051', category: 'account', title: 'How often should I change my password', content: 'Question: How often should I change my password? Answer: Use a strong unique password and update it anytime you suspect your account may be at risk.' },\n  { id: 'FAQ-052', category: 'account', title: 'Can I merge two accounts', content: 'Question: Can I merge two accounts? Answer: Account merging is not supported unless approved by support for special cases.' },\n  { id: 'FAQ-053', category: 'account', title: 'Can I transfer my account to another email', content: 'Question: Can I transfer my account to another email? Answer: You can usually update the account email from settings but ownership review may be required.' },\n  { id: 'FAQ-054', category: 'account', title: 'How do I download my account data', content: 'Question: How do I download my account data? Answer: Go to privacy or account settings and request a data export if available.' },\n  { id: 'FAQ-055', category: 'account', title: 'How do I delete my profile picture', content: 'Question: How do I delete my profile picture? Answer: Open your profile settings and remove or replace the current photo.' },\n  { id: 'FAQ-056', category: 'account', title: 'Why did I get a login alert email', content: 'Question: Why did I get a login alert email? Answer: We send login alerts when a new device or unusual sign-in is detected.' },\n  { id: 'FAQ-057', category: 'account', title: 'How do I turn off login alerts', content: 'Question: How do I turn off login alerts? Answer: Some security alerts are mandatory and cannot be disabled. Optional alerts can be managed in notifications.' },\n  { id: 'FAQ-058', category: 'account', title: 'How do I update notification preferences', content: 'Question: How do I update notification preferences? Answer: Go to notification settings and select which alerts or updates you want to receive.' },\n  { id: 'FAQ-059', category: 'account', title: 'How do I change my timezone', content: 'Question: How do I change my timezone? Answer: Update your timezone in profile or workspace settings.' },\n  { id: 'FAQ-060', category: 'account', title: 'How do I change my language', content: 'Question: How do I change my language? Answer: Go to settings and choose your preferred language from the language menu.' },\n  { id: 'FAQ-061', category: 'account', title: 'Can I share my account with a teammate', content: 'Question: Can I share my account with a teammate? Answer: Personal accounts should not be shared. Use team seats or workspace invites instead.' },\n  { id: 'FAQ-062', category: 'account', title: 'How do I invite a teammate', content: 'Question: How do I invite a teammate? Answer: Go to team or workspace settings and send an invite to your teammate\\'s email.' },\n  { id: 'FAQ-063', category: 'account', title: 'How do I remove a teammate', content: 'Question: How do I remove a teammate? Answer: Open team settings and remove the member from your workspace.' },\n  { id: 'FAQ-064', category: 'account', title: 'Can I change user roles', content: 'Question: Can I change user roles? Answer: Yes. Workspace admins can change member roles from team settings.' },\n  { id: 'FAQ-065', category: 'account', title: 'How do I become an admin', content: 'Question: How do I become an admin? Answer: Only an existing admin or owner can grant admin access.' },\n  { id: 'FAQ-066', category: 'account', title: 'What is the difference between owner and admin', content: 'Question: What is the difference between owner and admin? Answer: Owners have full billing and workspace control while admins manage users and settings based on policy.' },\n  { id: 'FAQ-067', category: 'account', title: 'How do I leave a workspace', content: 'Question: How do I leave a workspace? Answer: Open workspace settings and choose Leave Workspace if your role allows it.' },\n  { id: 'FAQ-068', category: 'account', title: 'Can I use one email for multiple workspaces', content: 'Question: Can I use one email for multiple workspaces? Answer: Yes. The same email can usually join multiple workspaces if invited.' },\n  { id: 'FAQ-069', category: 'account', title: 'How do I change my profile photo', content: 'Question: How do I change my profile photo? Answer: Go to profile settings and upload a new image.' },\n  { id: 'FAQ-070', category: 'account', title: 'How do I set a display name', content: 'Question: How do I set a display name? Answer: Open profile settings and update your display name.' },\n  { id: 'FAQ-071', category: 'account', title: 'How do I close my workspace', content: 'Question: How do I close my workspace? Answer: Workspace closure usually requires owner action or support review.' },\n  { id: 'FAQ-072', category: 'account', title: 'How do I recover my account if I lost access to my email', content: 'Question: How do I recover my account if I lost access to my email? Answer: Contact support to begin an ownership verification process.' },\n  { id: 'FAQ-073', category: 'account', title: 'Can I disable two-factor authentication', content: 'Question: Can I disable two-factor authentication? Answer: If policy allows it you can disable two-factor authentication from security settings.' },\n  { id: 'FAQ-074', category: 'account', title: 'My two-factor code is not working. What should I do', content: 'Question: My two-factor code is not working. What should I do? Answer: Check your device time sync and use a backup code if available.' },\n  { id: 'FAQ-075', category: 'account', title: 'How do I get backup codes', content: 'Question: How do I get backup codes? Answer: Open two-factor authentication settings and generate recovery codes.' },\n  { id: 'FAQ-076', category: 'account', title: 'How do I change my authenticator app', content: 'Question: How do I change my authenticator app? Answer: Disable and re-enable two-factor authentication to pair a new authenticator app.' },\n  { id: 'FAQ-077', category: 'account', title: 'Why do I keep getting signed out', content: 'Question: Why do I keep getting signed out? Answer: Frequent sign-outs may happen due to browser settings inactivity timeouts or security policy.' },\n  { id: 'FAQ-078', category: 'account', title: 'How do I set up single sign-on', content: 'Question: How do I set up single sign-on? Answer: Single sign-on setup is available on supported plans through admin authentication settings.' },\n  { id: 'FAQ-079', category: 'account', title: 'Can I use a custom domain for login', content: 'Question: Can I use a custom domain for login? Answer: Custom domain support depends on your plan and admin settings.' },\n  { id: 'FAQ-080', category: 'account', title: 'How do I contact security support', content: 'Question: How do I contact security support? Answer: Use the help center or support channel and mark the issue as a security concern.' },\n  { id: 'FAQ-081', category: 'billing', title: 'When will I be charged for my subscription', content: 'Question: When will I be charged for my subscription? Answer: Charges are processed on your renewal date based on your billing cycle.' },\n  { id: 'FAQ-082', category: 'billing', title: 'Do you bill monthly or yearly', content: 'Question: Do you bill monthly or yearly? Answer: We offer monthly and yearly billing on supported plans.' },\n  { id: 'FAQ-083', category: 'billing', title: 'How do I switch from monthly to yearly billing', content: 'Question: How do I switch from monthly to yearly billing? Answer: Go to billing settings and choose the annual plan if available.' },\n  { id: 'FAQ-084', category: 'billing', title: 'How do I switch from yearly to monthly billing', content: 'Question: How do I switch from yearly to monthly billing? Answer: You can change your billing cycle from billing settings subject to plan rules.' },\n  { id: 'FAQ-085', category: 'billing', title: 'Do you offer prorated upgrades', content: 'Question: Do you offer prorated upgrades? Answer: Many upgrades are prorated based on remaining time in the billing cycle.' },\n  { id: 'FAQ-086', category: 'billing', title: 'Do you offer prorated downgrades', content: 'Question: Do you offer prorated downgrades? Answer: Downgrade handling depends on your plan and billing policy.' },\n  { id: 'FAQ-087', category: 'billing', title: 'Why was my card charged after cancellation', content: 'Question: Why was my card charged after cancellation? Answer: A charge may still appear if cancellation happened after the renewal cutoff or while a pending renewal was processing.' },\n  { id: 'FAQ-088', category: 'billing', title: 'How do I add a payment method', content: 'Question: How do I add a payment method? Answer: Open billing settings and add a new payment method.' },\n  { id: 'FAQ-089', category: 'billing', title: 'How do I remove a payment method', content: 'Question: How do I remove a payment method? Answer: Open billing settings and remove the saved payment method if another valid method exists.' },\n  { id: 'FAQ-090', category: 'billing', title: 'Can I use PayPal', content: 'Question: Can I use PayPal? Answer: Available payment methods depend on your region and current billing options.' },\n  { id: 'FAQ-091', category: 'billing', title: 'Can I pay by bank transfer', content: 'Question: Can I pay by bank transfer? Answer: Bank transfer is available only on selected plans or enterprise contracts.' },\n  { id: 'FAQ-092', category: 'billing', title: 'Can I pay by invoice', content: 'Question: Can I pay by invoice? Answer: Invoice billing is generally available for larger business plans.' },\n  { id: 'FAQ-093', category: 'billing', title: 'Can I update the card holder name', content: 'Question: Can I update the card holder name? Answer: Yes. Update your payment method details in the billing section.' },\n  { id: 'FAQ-094', category: 'billing', title: 'Can I change my billing address', content: 'Question: Can I change my billing address? Answer: Yes. Edit your billing address in billing settings.' },\n  { id: 'FAQ-095', category: 'billing', title: 'Why was tax added to my invoice', content: 'Question: Why was tax added to my invoice? Answer: Applicable taxes depend on your billing location and tax rules.' },\n  { id: 'FAQ-096', category: 'billing', title: 'How do I add my tax ID', content: 'Question: How do I add my tax ID? Answer: Go to billing settings and add your tax information if supported.' },\n  { id: 'FAQ-097', category: 'billing', title: 'Can I get a VAT invoice', content: 'Question: Can I get a VAT invoice? Answer: If tax invoices are supported in your region they will appear in the billing section.' },\n  { id: 'FAQ-098', category: 'billing', title: 'How do I download a receipt', content: 'Question: How do I download a receipt? Answer: Receipts and invoices can be downloaded from billing history.' },\n  { id: 'FAQ-099', category: 'billing', title: 'Where can I see billing history', content: 'Question: Where can I see billing history? Answer: Open billing settings and review the billing history or invoices section.' },\n  { id: 'FAQ-100', category: 'billing', title: 'Can I get a copy of an old invoice', content: 'Question: Can I get a copy of an old invoice? Answer: Yes. Old invoices are usually available in billing history.' },\n  { id: 'FAQ-101', category: 'billing', title: 'Why was my trial converted to a paid plan', content: 'Question: Why was my trial converted to a paid plan? Answer: Trials convert automatically if they are not canceled before the end date.' },\n  { id: 'FAQ-102', category: 'billing', title: 'How do I cancel before trial ends', content: 'Question: How do I cancel before trial ends? Answer: Go to billing settings and cancel your plan before the trial expiration date.' },\n  { id: 'FAQ-103', category: 'billing', title: 'Do you offer a free plan', content: 'Question: Do you offer a free plan? Answer: Free plan availability depends on the product and current pricing model.' },\n  { id: 'FAQ-104', category: 'billing', title: 'How many seats are included in my plan', content: 'Question: How many seats are included in my plan? Answer: Included seats depend on your plan tier. Check the billing page for plan limits.' },\n  { id: 'FAQ-105', category: 'billing', title: 'How do I add more seats', content: 'Question: How do I add more seats? Answer: Open billing or team settings and increase the number of seats.' },\n  { id: 'FAQ-106', category: 'billing', title: 'How do I remove seats', content: 'Question: How do I remove seats? Answer: Reduce seats from billing or team settings subject to plan limits.' },\n  { id: 'FAQ-107', category: 'billing', title: 'Why did my invoice amount change', content: 'Question: Why did my invoice amount change? Answer: Invoice totals can change due to taxes seat changes prorations or plan updates.' },\n  { id: 'FAQ-108', category: 'billing', title: 'Can I pause my subscription', content: 'Question: Can I pause my subscription? Answer: Pause availability depends on your plan and account status.' },\n  { id: 'FAQ-109', category: 'billing', title: 'Can I restart my subscription after canceling', content: 'Question: Can I restart my subscription after canceling? Answer: Yes. In many cases you can restart from billing settings or by purchasing again.' },\n  { id: 'FAQ-110', category: 'billing', title: 'Do you offer nonprofit discounts', content: 'Question: Do you offer nonprofit discounts? Answer: Discount availability depends on current pricing programs and verification requirements.' },\n  { id: 'FAQ-111', category: 'billing', title: 'Do you offer startup discounts', content: 'Question: Do you offer startup discounts? Answer: Promotional or startup pricing may be available during specific programs.' },\n  { id: 'FAQ-112', category: 'billing', title: 'Can I use a promo code', content: 'Question: Can I use a promo code? Answer: If promotions are active you can apply a code during checkout or billing update.' },\n  { id: 'FAQ-113', category: 'billing', title: 'My promo code is not working. What should I do', content: 'Question: My promo code is not working. What should I do? Answer: Check the code expiration plan eligibility and spelling then try again.' },\n  { id: 'FAQ-114', category: 'billing', title: 'Can I get a refund for accidental purchase', content: 'Question: Can I get a refund for accidental purchase? Answer: Refunds depend on policy and may require manual review by support.' },\n  { id: 'FAQ-115', category: 'billing', title: 'Can I change the billing email', content: 'Question: Can I change the billing email? Answer: Yes. Update the billing contact email in billing settings.' },\n  { id: 'FAQ-116', category: 'billing', title: 'Can I split payment across two cards', content: 'Question: Can I split payment across two cards? Answer: Split payments are generally not supported unless your contract says otherwise.' },\n  { id: 'FAQ-117', category: 'billing', title: 'Why is my card being declined', content: 'Question: Why is my card being declined? Answer: Your bank may decline the payment due to limits risk checks or outdated card details.' },\n  { id: 'FAQ-118', category: 'billing', title: 'Can I retry a failed payment', content: 'Question: Can I retry a failed payment? Answer: Yes. You can update your method and retry from the billing page.' },\n  { id: 'FAQ-119', category: 'billing', title: 'What happens if I miss a payment', content: 'Question: What happens if I miss a payment? Answer: Service access may be limited after a failed payment until billing is resolved.' },\n  { id: 'FAQ-120', category: 'billing', title: 'How do I contact billing support', content: 'Question: How do I contact billing support? Answer: Use the support channel and choose billing as the issue category.' },\n  { id: 'FAQ-121', category: 'billing', title: 'What is your refund policy', content: 'Question: What is your refund policy? Answer: Refund eligibility depends on your plan purchase date and local policy requirements.' },\n  { id: 'FAQ-122', category: 'billing', title: 'Can I pay in my local currency', content: 'Question: Can I pay in my local currency? Answer: Supported billing currencies depend on your region and account configuration.' },\n  { id: 'FAQ-123', category: 'billing', title: 'Why was I billed in a different currency', content: 'Question: Why was I billed in a different currency? Answer: Charges may be processed in your account currency or payment provider currency settings.' },\n  { id: 'FAQ-124', category: 'billing', title: 'Can I prepay for multiple months', content: 'Question: Can I prepay for multiple months? Answer: Prepayment options are generally available only on selected business plans.' },\n  { id: 'FAQ-125', category: 'billing', title: 'How do I update purchase order information', content: 'Question: How do I update purchase order information? Answer: Purchase order handling depends on your billing arrangement and plan type.' },\n  { id: 'FAQ-126', category: 'billing', title: 'Can I transfer my subscription to another account', content: 'Question: Can I transfer my subscription to another account? Answer: Subscription transfers usually require support review.' },\n  { id: 'FAQ-127', category: 'billing', title: 'My invoice shows the wrong company name. How do I fix it', content: 'Question: My invoice shows the wrong company name. How do I fix it? Answer: Update your billing profile and request a corrected invoice if needed.' },\n  { id: 'FAQ-128', category: 'billing', title: 'Do you charge setup fees', content: 'Question: Do you charge setup fees? Answer: Setup fees depend on plan type and onboarding services.' },\n  { id: 'FAQ-129', category: 'billing', title: 'What happens to my data after cancellation', content: 'Question: What happens to my data after cancellation? Answer: Data retention after cancellation depends on plan policy and local rules.' },\n  { id: 'FAQ-130', category: 'billing', title: 'Can I restore a canceled paid plan', content: 'Question: Can I restore a canceled paid plan? Answer: In many cases yes if the account and data are still within the retention window.' },\n  { id: 'FAQ-131', category: 'technical', title: 'How do I clear cache', content: 'Question: How do I clear cache? Answer: Open your browser settings and clear cached files then reload the site.' },\n  { id: 'FAQ-132', category: 'technical', title: 'How do I clear app data', content: 'Question: How do I clear app data? Answer: Use the app settings or device settings to clear cached app data if supported.' },\n  { id: 'FAQ-133', category: 'technical', title: 'Why is the page blank after login', content: 'Question: Why is the page blank after login? Answer: A blank page may be caused by cached assets browser extensions or a temporary service issue.' },\n  { id: 'FAQ-134', category: 'technical', title: 'Why is the app stuck on loading', content: 'Question: Why is the app stuck on loading? Answer: Try refreshing signing out and back in or checking service status.' },\n  { id: 'FAQ-135', category: 'technical', title: 'How do I report a bug', content: 'Question: How do I report a bug? Answer: Use the support channel and include steps to reproduce the bug.' },\n  { id: 'FAQ-136', category: 'technical', title: 'What browser versions do you support', content: 'Question: What browser versions do you support? Answer: We support current major versions of modern browsers.' },\n  { id: 'FAQ-137', category: 'technical', title: 'Does the app work on Safari', content: 'Question: Does the app work on Safari? Answer: Yes. Safari is supported on recent versions unless a feature says otherwise.' },\n  { id: 'FAQ-138', category: 'technical', title: 'Does the app work on Firefox', content: 'Question: Does the app work on Firefox? Answer: Yes. Firefox is supported on recent versions.' },\n  { id: 'FAQ-139', category: 'technical', title: 'Does the app work on Edge', content: 'Question: Does the app work on Edge? Answer: Yes. Edge is supported on recent versions.' },\n  { id: 'FAQ-140', category: 'technical', title: 'Why am I getting a 403 error', content: 'Question: Why am I getting a 403 error? Answer: A 403 error may indicate permission or security restrictions on the resource.' },\n  { id: 'FAQ-141', category: 'technical', title: 'Why am I getting a 404 error', content: 'Question: Why am I getting a 404 error? Answer: The requested page or resource may no longer exist or the URL may be incorrect.' },\n  { id: 'FAQ-142', category: 'technical', title: 'Why am I getting a 500 error', content: 'Question: Why am I getting a 500 error? Answer: A 500 error usually indicates a temporary server issue. Please retry shortly.' },\n  { id: 'FAQ-143', category: 'technical', title: 'Why is my dashboard empty', content: 'Question: Why is my dashboard empty? Answer: Check filters date range permissions and whether data exists for that workspace.' },\n  { id: 'FAQ-144', category: 'technical', title: 'Why are my changes not saving', content: 'Question: Why are my changes not saving? Answer: Check your internet connection session status and whether the page has validation errors.' },\n  { id: 'FAQ-145', category: 'technical', title: 'How do I restore unsaved changes', content: 'Question: How do I restore unsaved changes? Answer: Recovery depends on the feature. Some pages auto-save drafts while others require manual re-entry.' },\n  { id: 'FAQ-146', category: 'technical', title: 'Why is a button disabled', content: 'Question: Why is a button disabled? Answer: A disabled action may require a certain role completed fields or a valid account state.' },\n  { id: 'FAQ-147', category: 'technical', title: 'Why am I missing a feature', content: 'Question: Why am I missing a feature? Answer: The feature may depend on plan level permissions region or phased rollout.' },\n  { id: 'FAQ-148', category: 'technical', title: 'How do I enable dark mode', content: 'Question: How do I enable dark mode? Answer: Go to appearance settings if dark mode is supported on your account.' },\n  { id: 'FAQ-149', category: 'technical', title: 'How do I switch themes', content: 'Question: How do I switch themes? Answer: Open appearance settings and choose your preferred theme.' },\n  { id: 'FAQ-150', category: 'technical', title: 'Why are my notifications delayed', content: 'Question: Why are my notifications delayed? Answer: Notification delays can happen due to device settings email provider delays or queue timing.' },\n  { id: 'FAQ-151', category: 'technical', title: 'Why am I not receiving push notifications', content: 'Question: Why am I not receiving push notifications? Answer: Check device notification permissions app settings and power-saving restrictions.' },\n  { id: 'FAQ-152', category: 'technical', title: 'Why am I not receiving email notifications', content: 'Question: Why am I not receiving email notifications? Answer: Check spam folders notification settings and whether the email address is verified.' },\n  { id: 'FAQ-153', category: 'technical', title: 'Why is file upload stuck', content: 'Question: Why is file upload stuck? Answer: Large files unsupported formats or unstable connections can interrupt uploads.' },\n  { id: 'FAQ-154', category: 'technical', title: 'What file types are supported', content: 'Question: What file types are supported? Answer: Supported file formats depend on the upload feature and workspace settings.' },\n  { id: 'FAQ-155', category: 'technical', title: 'What is the maximum upload size', content: 'Question: What is the maximum upload size? Answer: Maximum upload size depends on your plan and the feature you are using.' },\n  { id: 'FAQ-156', category: 'technical', title: 'Why was my file rejected', content: 'Question: Why was my file rejected? Answer: Files may be rejected due to size type corruption or security scanning rules.' },\n  { id: 'FAQ-157', category: 'technical', title: 'How do I export my data', content: 'Question: How do I export my data? Answer: Use the export option available in the relevant page or settings menu.' },\n  { id: 'FAQ-158', category: 'technical', title: 'How do I import data', content: 'Question: How do I import data? Answer: Use the import tool if your plan and permissions support it.' },\n  { id: 'FAQ-159', category: 'technical', title: 'Why is my import failing', content: 'Question: Why is my import failing? Answer: Imports may fail due to invalid format missing required columns or file size issues.' },\n  { id: 'FAQ-160', category: 'technical', title: 'How do I fix a sync issue', content: 'Question: How do I fix a sync issue? Answer: Try reconnecting the integration and checking service status or permission settings.' },\n  { id: 'FAQ-161', category: 'technical', title: 'Why is my integration disconnected', content: 'Question: Why is my integration disconnected? Answer: Tokens may expire or permissions may be revoked which can disconnect an integration.' },\n  { id: 'FAQ-162', category: 'technical', title: 'How do I reconnect an integration', content: 'Question: How do I reconnect an integration? Answer: Open integrations settings and reconnect the affected service.' },\n  { id: 'FAQ-163', category: 'technical', title: 'How do I revoke integration access', content: 'Question: How do I revoke integration access? Answer: Use the integrations page to disconnect the service and revoke access.' },\n  { id: 'FAQ-164', category: 'technical', title: 'Why is search not working', content: 'Question: Why is search not working? Answer: Search results may depend on indexing permissions or exact available data.' },\n  { id: 'FAQ-165', category: 'technical', title: 'Why is my report incomplete', content: 'Question: Why is my report incomplete? Answer: Reports may be filtered by date source permissions or processing status.' },\n  { id: 'FAQ-166', category: 'technical', title: 'Why are charts not loading', content: 'Question: Why are charts not loading? Answer: Charts may fail due to browser caching blocked scripts or temporary backend issues.' },\n  { id: 'FAQ-167', category: 'technical', title: 'Can I use the app offline', content: 'Question: Can I use the app offline? Answer: Offline support depends on the feature and device platform.' },\n  { id: 'FAQ-168', category: 'technical', title: 'Why am I being asked to update', content: 'Question: Why am I being asked to update? Answer: Updates may be required for security compatibility or feature support.' },\n  { id: 'FAQ-169', category: 'technical', title: 'How do I check the service status', content: 'Question: How do I check the service status? Answer: Visit the status page for current uptime incidents and maintenance notices.' },\n  { id: 'FAQ-170', category: 'technical', title: 'Why is my API token not working', content: 'Question: Why is my API token not working? Answer: Check token scope expiration and whether the endpoint or environment is correct.' },\n  { id: 'FAQ-171', category: 'technical', title: 'How do I regenerate an API token', content: 'Question: How do I regenerate an API token? Answer: Go to developer or security settings and create a new token if your role allows it.' },\n  { id: 'FAQ-172', category: 'technical', title: 'Why is my request rate-limited', content: 'Question: Why is my request rate-limited? Answer: Rate limits protect service stability. Retry later or review your plan limits.' },\n  { id: 'FAQ-173', category: 'technical', title: 'How do I troubleshoot connection timeouts', content: 'Question: How do I troubleshoot connection timeouts? Answer: Check your network firewall proxy settings and retry after a short wait.' },\n  { id: 'FAQ-174', category: 'technical', title: 'Why does the app log me out during inactivity', content: 'Question: Why does the app log me out during inactivity? Answer: Session timeout behavior may be required by security policy.' },\n  { id: 'FAQ-175', category: 'technical', title: 'Why are images not loading', content: 'Question: Why are images not loading? Answer: Image loading issues may be caused by network restrictions caching or content blocking.' },\n  { id: 'FAQ-176', category: 'technical', title: 'How do I contact technical support', content: 'Question: How do I contact technical support? Answer: Use the support form and choose technical issue as the category.' },\n  { id: 'FAQ-177', category: 'general', title: 'What is this platform used for', content: 'Question: What is this platform used for? Answer: The platform helps users manage accounts workflows and support operations.' },\n  { id: 'FAQ-178', category: 'general', title: 'Who is this service for', content: 'Question: Who is this service for? Answer: The service is designed for individuals teams and organizations depending on the selected plan.' },\n  { id: 'FAQ-179', category: 'general', title: 'Where are you based', content: 'Question: Where are you based? Answer: Company location details are available on the official website or legal pages.' },\n  { id: 'FAQ-180', category: 'general', title: 'Do you have a help center', content: 'Question: Do you have a help center? Answer: Yes. The help center contains setup guides troubleshooting steps and FAQs.' },\n  { id: 'FAQ-181', category: 'general', title: 'Do you have a status page', content: 'Question: Do you have a status page? Answer: Yes. Use the status page to monitor outages maintenance and incidents.' },\n  { id: 'FAQ-182', category: 'general', title: 'Do you offer onboarding support', content: 'Question: Do you offer onboarding support? Answer: Onboarding assistance may be available depending on your plan.' },\n  { id: 'FAQ-183', category: 'general', title: 'Do you offer training sessions', content: 'Question: Do you offer training sessions? Answer: Training options depend on your plan and customer success package.' },\n  { id: 'FAQ-184', category: 'general', title: 'Do you provide demos', content: 'Question: Do you provide demos? Answer: Yes. Demo availability depends on your use case and sales process.' },\n  { id: 'FAQ-185', category: 'general', title: 'Can I request a feature', content: 'Question: Can I request a feature? Answer: Yes. You can submit feature requests through support or feedback channels.' },\n  { id: 'FAQ-186', category: 'general', title: 'How long does support take to reply', content: 'Question: How long does support take to reply? Answer: Response time depends on your plan issue severity and queue volume.' },\n  { id: 'FAQ-187', category: 'general', title: 'Do you support enterprise customers', content: 'Question: Do you support enterprise customers? Answer: Yes. Enterprise support depends on commercial arrangements and plan availability.' },\n  { id: 'FAQ-188', category: 'general', title: 'Do you provide SLAs', content: 'Question: Do you provide SLAs? Answer: Service level agreements may be available on eligible business plans.' },\n  { id: 'FAQ-189', category: 'general', title: 'Do you have an affiliate program', content: 'Question: Do you have an affiliate program? Answer: Program availability depends on current partnership offerings.' },\n  { id: 'FAQ-190', category: 'general', title: 'Do you have a partner program', content: 'Question: Do you have a partner program? Answer: Partnership options may be available through our sales or partnerships team.' },\n  { id: 'FAQ-191', category: 'general', title: 'Can I request accessibility support', content: 'Question: Can I request accessibility support? Answer: Yes. Contact support if you need accessibility assistance or accommodations.' },\n  { id: 'FAQ-192', category: 'general', title: 'Do you support screen readers', content: 'Question: Do you support screen readers? Answer: Accessibility support depends on feature area and current implementation status.' },\n  { id: 'FAQ-193', category: 'general', title: 'Where can I read the privacy policy', content: 'Question: Where can I read the privacy policy? Answer: The privacy policy is available on the official website.' },\n  { id: 'FAQ-194', category: 'general', title: 'Where can I read the terms of service', content: 'Question: Where can I read the terms of service? Answer: The terms of service are available on the official website.' },\n  { id: 'FAQ-195', category: 'general', title: 'How do I report abuse', content: 'Question: How do I report abuse? Answer: Contact support and include relevant evidence so the abuse report can be reviewed.' },\n  { id: 'FAQ-196', category: 'general', title: 'How do I report a security issue', content: 'Question: How do I report a security issue? Answer: Use the security contact path or support channel and mark the issue as security-related.' },\n  { id: 'FAQ-197', category: 'general', title: 'Do you comply with data regulations', content: 'Question: Do you comply with data regulations? Answer: Compliance support depends on your plan region and legal requirements.' },\n  { id: 'FAQ-198', category: 'general', title: 'Can I request data deletion', content: 'Question: Can I request data deletion? Answer: Data deletion requests can usually be submitted through privacy support or account settings.' },\n  { id: 'FAQ-199', category: 'general', title: 'Do you store backups', content: 'Question: Do you store backups? Answer: Backup and retention practices depend on the product architecture and policy.' },\n  { id: 'FAQ-200', category: 'general', title: 'How long do you retain data', content: 'Question: How long do you retain data? Answer: Data retention depends on your plan status legal requirements and product policy.' },\n  { id: 'FAQ-201', category: 'general', title: 'Can I request a custom contract', content: 'Question: Can I request a custom contract? Answer: Custom commercial terms may be available for larger organizations.' },\n  { id: 'FAQ-202', category: 'general', title: 'Do you offer implementation help', content: 'Question: Do you offer implementation help? Answer: Implementation help may be available through onboarding or professional services.' },\n  { id: 'FAQ-203', category: 'general', title: 'Can you migrate data from another platform', content: 'Question: Can you migrate data from another platform? Answer: Migration support depends on your plan and the source system.' },\n  { id: 'FAQ-204', category: 'general', title: 'Do you have a community forum', content: 'Question: Do you have a community forum? Answer: Community resources may be available through official support or product channels.' },\n  { id: 'FAQ-205', category: 'general', title: 'Can I subscribe to release notes', content: 'Question: Can I subscribe to release notes? Answer: Yes. Release notes are typically available on the website or help center.' },\n  { id: 'FAQ-206', category: 'general', title: 'How do I know when maintenance is scheduled', content: 'Question: How do I know when maintenance is scheduled? Answer: Scheduled maintenance updates are posted on the status page or sent by email when applicable.' },\n  { id: 'FAQ-207', category: 'general', title: 'Do you offer multilingual support', content: 'Question: Do you offer multilingual support? Answer: Language support depends on the product area and support channel.' },\n  { id: 'FAQ-208', category: 'general', title: 'Can I use the service for my team', content: 'Question: Can I use the service for my team? Answer: Yes. Team and workspace features are available on supported plans.' },\n  { id: 'FAQ-209', category: 'general', title: 'How do I contact sales', content: 'Question: How do I contact sales? Answer: Use the contact or pricing page to reach the sales team.' },\n  { id: 'FAQ-210', category: 'general', title: 'Where can I see product updates', content: 'Question: Where can I see product updates? Answer: Product updates are shared through release notes the help center or official announcements.' }\n];\n\nfunction tokenize(value) {\n  return (value || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);\n}\n\nconst queryTokens = tokenize(query);\nconst scoredDocs = knowledgeBase\n  .map((doc) => {\n    const docTokens = tokenize(`${doc.title} ${doc.content} ${doc.category}`);\n    const overlap = queryTokens.filter((token) => docTokens.includes(token)).length;\n    const categoryBonus = item.category && item.category === doc.category ? 1.5 : 0;\n    return {\n      ...doc,\n      score: overlap + categoryBonus\n    };\n  })\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 3);\n\nconst retrieval_context = scoredDocs\n  .filter((doc) => doc.score > 0)\n  .map((doc, index) => `Document ${index + 1}\\nID: ${doc.id}\\nCategory: ${doc.category}\\nTitle: ${doc.title}\\nContent: ${doc.content}`)\n  .join('\\n\\n');\n\nreturn [{\n  json: {\n    ...item,\n    retrieved_documents: scoredDocs,\n    retrieval_context,\n    retrieval_top_score: scoredDocs[0]?.score || 0,\n    retrieval_has_candidate: Boolean(scoredDocs[0] && scoredDocs[0].score > 0)\n  }\n}];"
       },
       "id": "a28586b7-7db6-4b82-afbc-256c21759c32",
-      "name": "FAQ Matcher",
+      "name": "Retrieve Support Knowledge",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -171,26 +171,83 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst query = (item.customer_query || '').toLowerCase();\nconst negativeSignals = ['angry', 'frustrated', 'refund', 'complaint', 'charged twice', 'urgent', 'not working', 'terrible', 'bad service', 'cancel immediately', 'money deducted'];\nconst hasNegativeSignal = negativeSignals.some((word) => query.includes(word));\n\nconst escalate = (\n  item.matched_faq === false ||\n  item.urgency === 'high' ||\n  item.sentiment === 'negative' ||\n  hasNegativeSignal\n);\n\nlet summary = `Customer query: ${item.customer_query}. Category: ${item.category}. Urgency: ${item.urgency}. Sentiment: ${item.sentiment}.`;\nif (!item.matched_faq) summary += ' No FAQ match found.';\n\nreturn [{\n  json: {\n    ...item,\n    escalate,\n    escalation_reason: escalate\n      ? 'Complex, urgent, negative, or unmatched query requiring human review'\n      : 'FAQ matched and safe to auto-resolve',\n    summary_for_human: summary\n  }\n}];"
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.GROQ_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'llama-3.3-70b-versatile',\n  response_format: { type: 'json_object' },\n  temperature: 0.1,\n  messages: [\n    {\n      role: 'system',\n      content: 'You are a grounded FAQ responder for a customer support system. Use only the retrieved context provided to you. Return only valid JSON with keys matched (boolean), faq_id (string), answer (string), confidence (one of low, medium, high), and rationale (string). If the context is insufficient or does not safely answer the customer query, return matched=false and an empty answer.'\n    },\n    {\n      role: 'user',\n      content: 'Customer query: ' + ($json.customer_query || '') + '\\n\\nRetrieved context:\\n' + ($json.retrieval_context || 'No relevant support context retrieved.')\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "id": "581ce330-1fb8-4717-8d9c-b847b95d4fa3",
+      "name": "Grounded FAQ Responder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1216,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $('Retrieve Support Knowledge').first().json;\nconst ragRaw = $('Grounded FAQ Responder').first().json;\n\nlet rag = {};\ntry {\n  rag = JSON.parse(ragRaw.choices?.[0]?.message?.content || '{}');\n} catch (error) {\n  rag = { matched: false, faq_id: '', answer: '', confidence: 'low', rationale: 'rag_parse_failed' };\n}\n\nconst matched_faq = Boolean(rag.matched) && Boolean(rag.answer);\n\nreturn [{\n  json: {\n    ...base,\n    matched_faq,\n    faq_answer: matched_faq ? rag.answer : '',\n    faq_id: matched_faq ? (rag.faq_id || '') : '',\n    faq_confidence: rag.confidence || 'low',\n    faq_rationale: rag.rationale || ''\n  }\n}];"
+      },
+      "id": "8d81d474-f926-48cb-8037-3f011bc2cdf7",
+      "name": "Merge RAG Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst query = (item.customer_query || '').toLowerCase();\nconst negativeSignals = ['angry', 'frustrated', 'refund', 'complaint', 'charged twice', 'urgent', 'not working', 'terrible', 'bad service', 'cancel immediately', 'money deducted', 'scammed', 'fraud'];\nconst hasNegativeSignal = negativeSignals.some((word) => query.includes(word));\n\nconst escalate = (\n  item.matched_faq === false ||\n  item.urgency === 'high' ||\n  item.sentiment === 'negative' ||\n  hasNegativeSignal\n);\n\nlet summary = `Customer query: ${item.customer_query}. Category: ${item.category}. Urgency: ${item.urgency}. Sentiment: ${item.sentiment}.`;\nif (!item.matched_faq) summary += ' No grounded answer found from retrieved knowledge.';\n\nreturn [{\n  json: {\n    ...item,\n    escalate,\n    escalation_reason: escalate\n      ? 'Complex, urgent, negative, or unsupported query requiring human review'\n      : 'Retrieved support knowledge provided a safe grounded answer',\n    summary_for_human: summary\n  }\n}];"
       },
       "id": "429f104f-08b6-4cc1-8032-940d1d208132",
       "name": "Escalation Logic",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1216,
+        1664,
         576
       ]
     },
     {
       "parameters": {
         "conditions": {
-          "boolean": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
             {
-              "value1": "={{$json.escalate}}",
-              "operation": "true"
+              "id": "should-escalate-boolean-check",
+              "leftValue": "={{ Boolean($json.escalate) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal",
+                "name": "filter.operator.equals"
+              }
             }
-          ]
+          ],
+          "combinator": "and"
         },
         "options": {}
       },
@@ -199,7 +256,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1440,
+        1888,
         576
       ]
     },
@@ -228,7 +285,7 @@
             {
               "id": "b4",
               "name": "response_text",
-              "value": "={{$json.faq_answer}}",
+              "value": "={{$json.faq_answer || 'Thanks for reaching out. We found guidance in our support knowledge base for your request.'}}",
               "type": "string"
             }
           ]
@@ -241,7 +298,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1664,
+        2112,
         752
       ]
     },
@@ -254,8 +311,86 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1664,
+        2112,
         400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fp1",
+              "name": "request_id",
+              "value": "={{$json.request_id}}",
+              "type": "string"
+            },
+            {
+              "id": "fp2",
+              "name": "status",
+              "value": "={{$json.final_status}}",
+              "type": "string"
+            },
+            {
+              "id": "fp3",
+              "name": "category",
+              "value": "={{$json.category}}",
+              "type": "string"
+            },
+            {
+              "id": "fp4",
+              "name": "urgency",
+              "value": "={{$json.urgency}}",
+              "type": "string"
+            },
+            {
+              "id": "fp5",
+              "name": "sentiment",
+              "value": "={{$json.sentiment}}",
+              "type": "string"
+            },
+            {
+              "id": "fp6",
+              "name": "matched_faq",
+              "value": "={{$json.matched_faq}}",
+              "type": "boolean"
+            },
+            {
+              "id": "fp7",
+              "name": "faq_id",
+              "value": "={{$json.faq_id}}",
+              "type": "string"
+            },
+            {
+              "id": "fp8",
+              "name": "escalated",
+              "value": "={{$json.escalated}}",
+              "type": "boolean"
+            },
+            {
+              "id": "fp9",
+              "name": "ticket_id",
+              "value": "={{$json.ticket_id}}",
+              "type": "string"
+            },
+            {
+              "id": "fp10",
+              "name": "message",
+              "value": "={{$json.response_text}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "9f2b6770-3f49-41d4-ae2c-5aa63443e151",
+      "name": "Build Final Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2336,
+        448
       ]
     },
     {
@@ -318,25 +453,31 @@
             },
             {
               "id": "l10",
+              "name": "faq_confidence",
+              "value": "={{$json.faq_confidence}}",
+              "type": "string"
+            },
+            {
+              "id": "l11",
               "name": "status",
               "value": "={{$json.final_status}}",
               "type": "string"
             },
             {
-              "id": "l11",
+              "id": "l12",
               "name": "ticket_id",
               "value": "={{$json.ticket_id}}",
               "type": "string"
             },
             {
-              "id": "l12",
+              "id": "l13",
               "name": "timestamp",
               "value": "={{$json.timestamp}}",
               "type": "string"
             }
           ]
         },
-        "includeOtherFields": true,
+        "includeOtherFields": false,
         "options": {}
       },
       "id": "57ac1b94-a3b9-4038-81d4-0e287b92ad40",
@@ -344,14 +485,13 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1888,
+        2336,
         704
       ]
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"request_id\": $json.request_id,\n  \"status\": $json.final_status,\n  \"category\": $json.category,\n  \"urgency\": $json.urgency,\n  \"sentiment\": $json.sentiment,\n  \"matched_faq\": $json.matched_faq,\n  \"faq_id\": $json.faq_id,\n  \"escalated\": $json.escalated,\n  \"ticket_id\": $json.ticket_id,\n  \"message\": $json.response_text\n}",
+        "respondWith": "firstIncomingItem",
         "options": {
           "responseCode": 200
         }
@@ -361,7 +501,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.3,
       "position": [
-        1888,
+        2560,
         448
       ]
     },
@@ -380,13 +520,14 @@
             "request_id": "={{$json.request_id}}",
             "customer_id": "={{$json.customer_id}}",
             "channel": "={{$json.channel}}",
-            "query": "={{$json.customer_query}}",
+            "query": "={{$json.query}}",
             "category": "={{$json.category}}",
             "urgency": "={{$json.urgency}}",
             "sentiment": "={{$json.sentiment}}",
             "matched_faq": "={{$json.matched_faq}}",
             "faq_id": "={{$json.faq_id}}",
-            "status": "={{$json.final_status}}",
+            "faq_confidence": "={{$json.faq_confidence}}",
+            "status": "={{$json.status}}",
             "ticket_id": "={{$json.ticket_id}}",
             "timestamp": "={{$json.timestamp}}"
           },
@@ -402,7 +543,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        2112,
+        2560,
         704
       ],
       "onError": "continueRegularOutput"
@@ -473,14 +614,36 @@
       "main": [
         [
           {
-            "node": "FAQ Matcher",
+            "node": "Retrieve Support Knowledge",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "FAQ Matcher": {
+    "Retrieve Support Knowledge": {
+      "main": [
+        [
+          {
+            "node": "Grounded FAQ Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grounded FAQ Responder": {
+      "main": [
+        [
+          {
+            "node": "Merge RAG Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge RAG Result": {
       "main": [
         [
           {
@@ -524,7 +687,7 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Build Final Payload",
             "type": "main",
             "index": 0
           },
@@ -540,12 +703,23 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Build Final Payload",
             "type": "main",
             "index": 0
           },
           {
             "node": "Prepare Log Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final Payload": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }

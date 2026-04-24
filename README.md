@@ -1,12 +1,12 @@
 # Agentic Customer Support System
 
-Agentic Customer Support System is a multi-agent support workflow that automates first-line customer service across website chat, email, or webhook-based channels. It uses specialized AI agents for intake classification, sentiment analysis, FAQ resolution, and escalation, while keeping a human-in-the-loop for sensitive or unresolved cases.
+Agentic Customer Support System is a multi-agent support workflow that automates first-line customer service across website chat, email, or webhook-based channels. It uses specialized AI agents for intake classification, sentiment analysis, retrieval-augmented FAQ resolution, and escalation, while keeping a human-in-the-loop for sensitive or unresolved cases.
 
 This repository includes:
 - workflow exports for `n8n` and `Flowise`
 - a React demo frontend for live walkthroughs
 - project architecture, API, prompt, and testing documentation
-- sample FAQ and support query datasets
+- a CSV-backed FAQ knowledge base with 210 support entries
 - a lightweight dashboard starter for analytics demos
 
 ## Problem Statement
@@ -21,7 +21,7 @@ Support teams spend significant time answering repetitive questions while also m
 ## Core Features
 
 - Intake classifier agent for topic and urgency detection
-- FAQ responder agent powered by a knowledge base
+- RAG-powered FAQ responder grounded in retrieved support knowledge
 - Sentiment analyzer agent for mood detection and risk flagging
 - Escalation handler agent for human handoff
 - Orchestration layer coordinating all agent decisions
@@ -36,8 +36,8 @@ Support teams spend significant time answering repetitive questions while also m
 1. A customer sends a support request through a webhook from a chat widget, email connector, or messaging channel.
 2. The intake classifier agent categorizes the message by topic and urgency.
 3. The sentiment analyzer agent scores the tone as positive, neutral, or negative.
-4. The orchestrator checks whether the message can be safely resolved from the FAQ knowledge base.
-5. If a confident FAQ match exists, the FAQ responder sends an automated reply.
+4. The workflow retrieves the most relevant support knowledge for the message.
+5. A grounded FAQ responder answers only from that retrieved context when it is safe to do so.
 6. If the issue is complex, high urgency, or strongly negative, the escalation handler creates a ticket and prepares a summary for a human support agent.
 7. The system logs the interaction and updates dashboard metrics such as response time, resolution rate, and escalation frequency.
 
@@ -54,8 +54,8 @@ Support teams spend significant time answering repetitive questions while also m
 - Increases escalation priority for negative interactions
 
 ### FAQ Responder Agent
-- Searches the knowledge base for common issues
-- Generates direct, concise, policy-safe responses
+- Retrieves relevant support knowledge from the in-workflow knowledge base
+- Generates direct, concise, policy-safe responses grounded in retrieved context
 - Resolves repetitive support queries without human intervention
 
 ### Escalation Handler Agent
@@ -93,6 +93,7 @@ Support teams spend significant time answering repetitive questions while also m
 
 - `n8n` / `Flowise` for orchestration and agent chaining
 - Prompt engineering for role-specific agent behavior
+- Retrieval-augmented generation for grounded FAQ answers
 - Sentiment analysis APIs or LLM-based sentiment classification
 - Webhook handling for support query intake
 - React + Vite frontend for demo and presentation
@@ -160,6 +161,7 @@ Import these files into your tools:
 - `flows/flowise-chatflow-export.json`
 
 For the exported n8n workflow:
+- the retrieval corpus in `Retrieve Support Knowledge` is synced to `data/faq.csv`
 - set `GROQ_API_KEY` in your n8n environment before enabling the classifier and sentiment nodes
 - replace the placeholder Google Sheet id before enabling conversation logging
 
@@ -169,12 +171,13 @@ For the exported n8n workflow:
 - [Prompt Templates](./docs/prompts.md)
 - [API Specification](./docs/api-spec.md)
 - [Test Cases](./docs/test-cases.md)
+- [Vector RAG Upgrade](./docs/vector-rag.md)
 
 ## Analytics Tracked
 
 The dashboard and logs are designed to track:
 - average response time
-- FAQ auto-resolution rate
+- grounded FAQ auto-resolution rate
 - escalation frequency
 - sentiment distribution
 - category-wise support volume
