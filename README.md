@@ -213,6 +213,7 @@ For a more advanced semantic retrieval setup, see [docs/vector-rag.md](/Users/kr
 ## Links
 
 - Repository: [spy-in-shadows/agentic-customer-support-system](https://github.com/spy-in-shadows/agentic-customer-support-system)
+- Frontend: [agentic-customer-support-system.netlify.app](https://agentic-customer-support-system.netlify.app/)
 - Backend webhook: [spy-in-shadows.app.n8n.cloud](https://spy-in-shadows.app.n8n.cloud/webhook/agentic-customer-support)
 
 ## License
