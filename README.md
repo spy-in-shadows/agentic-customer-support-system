@@ -1,72 +1,78 @@
 # Agentic Customer Support System
 
-Agentic Customer Support System is a multi-agent support workflow that automates first-line customer service across website chat, email, or webhook-based channels. It uses specialized AI agents for intake classification, sentiment analysis, retrieval-augmented FAQ resolution, and escalation, while keeping a human-in-the-loop for sensitive or unresolved cases.
+An AI-assisted customer support workflow that classifies incoming requests, analyzes sentiment, retrieves grounded support knowledge, and routes unresolved or high-risk issues to a human escalation path.
 
-This repository includes:
-- workflow exports for `n8n` and `Flowise`
-- a React demo frontend for live walkthroughs
-- project architecture, API, prompt, and testing documentation
-- a CSV-backed FAQ knowledge base with 210 support entries
-- a lightweight dashboard starter for analytics demos
+The system combines a React frontend, an `n8n` orchestration workflow, retrieval-augmented response generation, Google Sheets logging, and optional vector-RAG scaffolding for semantic search upgrades.
 
-## Problem Statement
+## Overview
 
-Support teams spend significant time answering repetitive questions while also managing urgent, emotional, or technically complex issues that need human judgment. This project reduces manual load by routing each customer message through a multi-agent pipeline that can:
-- classify the query topic and urgency
-- detect customer sentiment
-- answer common questions from a knowledge base
-- escalate high-risk or unresolved cases to a human agent
-- log each interaction for monitoring and analytics
+This repository is designed around a practical support operations use case:
 
-## Core Features
+- accept customer queries from a webhook-powered interface
+- classify topic and urgency
+- analyze customer sentiment
+- retrieve relevant support knowledge
+- generate grounded FAQ-style responses when safe
+- escalate unresolved or sensitive cases with structured context
+- log interactions for reporting and analytics
 
-- Intake classifier agent for topic and urgency detection
-- RAG-powered FAQ responder grounded in retrieved support knowledge
-- Sentiment analyzer agent for mood detection and risk flagging
-- Escalation handler agent for human handoff
-- Orchestration layer coordinating all agent decisions
-- Webhook-based integration for incoming support messages
-- Conversation logging for traceability
-- Analytics dashboard for response and escalation metrics
-- Customizable prompt templates for each agent role
-- Full workflow architecture documentation
+The result is a modular support pipeline that is easier to audit, tune, and extend than a single general-purpose chatbot.
 
-## Example Workflow
+## Key Capabilities
 
-1. A customer sends a support request through a webhook from a chat widget, email connector, or messaging channel.
-2. The intake classifier agent categorizes the message by topic and urgency.
-3. The sentiment analyzer agent scores the tone as positive, neutral, or negative.
-4. The workflow retrieves the most relevant support knowledge for the message.
-5. A grounded FAQ responder answers only from that retrieved context when it is safe to do so.
-6. If the issue is complex, high urgency, or strongly negative, the escalation handler creates a ticket and prepares a summary for a human support agent.
-7. The system logs the interaction and updates dashboard metrics such as response time, resolution rate, and escalation frequency.
+- Multi-agent workflow for classification, sentiment analysis, retrieval, response generation, and escalation
+- Webhook-based intake for website chat or other external systems
+- Grounded response generation using retrieved support knowledge
+- Human-in-the-loop escalation path with ticket generation
+- Google Sheets conversation logging
+- React demo UI connected to the live workflow
+- CSV-backed FAQ knowledge base with 210 support entries
+- Vector-RAG scaffold for future embeddings-based retrieval
 
-## Agent Roles
+## Architecture
 
-### Intake Classifier Agent
-- Detects support topic such as billing, technical, account, or general inquiry
-- Assigns urgency level such as low, medium, or high
-- Provides structured metadata for downstream routing
+```text
+Customer Query
+    |
+    v
+Webhook Intake
+    |
+    v
+Intake Classifier ---------> Sentiment Analyzer
+    |                            |
+    +------------+---------------+
+                 |
+                 v
+      Knowledge Retrieval
+             |
+             v
+     Grounded FAQ Responder
+             |
+             v
+      Orchestration Decision
+        /                \
+       /                  \
+      v                    v
+ FAQ Response       Escalation Handler
+         |                    |
+         +----------+---------+
+                    |
+                    v
+         Logging + Analytics
+```
 
-### Sentiment Analyzer Agent
-- Evaluates emotional tone of the message
-- Flags frustrated or high-risk conversations
-- Increases escalation priority for negative interactions
+Additional architecture details are documented in [docs/architecture.md](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/architecture.md).
 
-### FAQ Responder Agent
-- Retrieves relevant support knowledge from the in-workflow knowledge base
-- Generates direct, concise, policy-safe responses grounded in retrieved context
-- Resolves repetitive support queries without human intervention
+## Workflow Summary
 
-### Escalation Handler Agent
-- Takes over unresolved, sensitive, or high-risk cases
-- Creates a human handoff summary with customer context
-- Routes the issue to the right support queue or team
-
-### Orchestration Layer
-- Coordinates handoffs between specialized agents
-- Applies business rules for auto-resolution vs escalation
-- Ensures every interaction is logged consistently
+1. A customer submits a support query through the frontend or any webhook-compatible source.
+2. The `Webhook` and `Normalize Input` nodes standardize the payload.
+3. The intake classifier assigns a category and urgency.
+4. The sentiment analyzer labels the interaction as positive, neutral, or negative.
+5. The retrieval layer selects the most relevant support knowledge from the FAQ corpus.
+6. The grounded responder generates a structured answer only from the retrieved context.
+7. Escalation logic decides whether the query is safe to auto-resolve or should be routed to a human.
+8. The workflow returns a customer-facing response and logs the interaction.
 
 ## Repository Structure
 
@@ -81,55 +87,33 @@ Support teams spend significant time answering repetitive questions while also m
 │   ├── api-spec.md
 │   ├── architecture.md
 │   ├── prompts.md
-│   └── test-cases.md
+│   ├── test-cases.md
+│   └── vector-rag.md
 ├── flows/
 │   ├── flowise-chatflow-export.json
 │   └── n8n-workflow-export.json
-└── frontend/
-    └── src/App.jsx
+├── frontend/
+│   ├── src/
+│   └── .env.example
+├── scripts/
+│   └── ingest_vector_kb.mjs
+└── vector_rag/
+    ├── faq_documents.jsonl
+    └── supabase_schema.sql
 ```
 
-## Tech Stack
+## Stack
 
-- `n8n` / `Flowise` for orchestration and agent chaining
-- Prompt engineering for role-specific agent behavior
-- Retrieval-augmented generation for grounded FAQ answers
-- Sentiment analysis APIs or LLM-based sentiment classification
-- Webhook handling for support query intake
-- React + Vite frontend for demo and presentation
-- Streamlit-ready Python dashboard starter for analytics
+- `n8n` for orchestration
+- Groq API for classification, sentiment analysis, and grounded response generation
+- React + Vite for the support console
+- Google Sheets for conversation logging
+- CSV knowledge base for lightweight retrieval
+- Supabase + embeddings scaffold for vector-RAG expansion
 
-## Milestones
+## Getting Started
 
-### Milestone 1: Architecture and Agent Design
-- Define agent roles and responsibilities
-- Design multi-agent orchestration flow
-- Set up `n8n` / `Flowise` environment
-- Create FAQ knowledge base
-- Draft prompt templates
-- Document system architecture
-
-### Milestone 2: Core Agents
-- Build intake classifier agent
-- Implement FAQ responder with KB lookup
-- Set up webhook integration
-- Connect classifier to FAQ flow in `n8n` / `Flowise`
-
-### Milestone 3: Sentiment and Escalation
-- Add sentiment analyzer agent
-- Build escalation handler with human handoff
-- Connect all agents into full orchestration pipeline
-- Add interaction logging and baseline analytics
-
-### Milestone 4: Dashboard, Testing, and Demo
-- Build analytics dashboard
-- Run end-to-end tests with diverse queries
-- Refine prompt templates for consistency
-- Finalize architecture documentation and demo walkthrough
-
-## Local Setup
-
-### Frontend Demo
+### 1. Frontend
 
 ```bash
 cd frontend
@@ -138,14 +122,23 @@ cp .env.example .env
 npm run dev
 ```
 
-The Vite app provides:
-- a support console connected to n8n when `VITE_N8N_WEBHOOK_URL` is configured
-- a webhook payload preview
-- a local fallback path when the webhook is unavailable
-- sample analytics cards and logs
-- a simplified architecture walkthrough for demos
+The frontend reads `VITE_N8N_WEBHOOK_URL` and sends customer queries to the configured workflow endpoint.
 
-### Dashboard Starter
+### 2. n8n Workflow
+
+Import:
+
+- [flows/n8n-workflow-export.json](/Users/krishnaverma/Desktop/agentic-customer-support-system/flows/n8n-workflow-export.json)
+- [flows/flowise-chatflow-export.json](/Users/krishnaverma/Desktop/agentic-customer-support-system/flows/flowise-chatflow-export.json)
+
+For the n8n workflow:
+
+- the retrieval corpus in `Retrieve Support Knowledge` is aligned with [data/faq.csv](/Users/krishnaverma/Desktop/agentic-customer-support-system/data/faq.csv)
+- on n8n Cloud, create a variable named `GROQ_API_KEY` and reference it as `{{$vars.GROQ_API_KEY}}`
+- on self-hosted n8n, provide `GROQ_API_KEY` through the runtime environment
+- reconnect Google Sheets credentials before enabling logging
+
+### 3. Dashboard
 
 ```bash
 python -m venv .venv
@@ -154,70 +147,74 @@ pip install streamlit pandas
 streamlit run dashboard/app.py
 ```
 
-### Workflow Assets
+## Deployment
 
-Import these files into your tools:
-- `flows/n8n-workflow-export.json`
-- `flows/flowise-chatflow-export.json`
+### Active Backend
 
-For the exported n8n workflow:
-- the retrieval corpus in `Retrieve Support Knowledge` is synced to `data/faq.csv`
-- set `GROQ_API_KEY` in your n8n environment before enabling the classifier and sentiment nodes
-- replace the placeholder Google Sheet id before enabling conversation logging
+The current live webhook backend is:
+
+```text
+https://spy-in-shadows.app.n8n.cloud/webhook/agentic-customer-support
+```
+
+### Frontend Deployment
+
+Deploy the `frontend/` directory to Netlify or Vercel and set:
+
+```env
+VITE_N8N_WEBHOOK_URL=https://spy-in-shadows.app.n8n.cloud/webhook/agentic-customer-support
+```
+
+### n8n Cloud Variables
+
+In n8n Cloud, add:
+
+- `GROQ_API_KEY`
+
+Then reference it in HTTP nodes using:
+
+```text
+Bearer {{$vars.GROQ_API_KEY}}
+```
+
+## Data and Retrieval
+
+The system currently uses a lightweight retrieval layer driven by the support corpus in [data/faq.csv](/Users/krishnaverma/Desktop/agentic-customer-support-system/data/faq.csv), which contains 210 curated FAQ entries across:
+
+- account
+- billing
+- technical
+- general
+
+For a more advanced semantic retrieval setup, see [docs/vector-rag.md](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/vector-rag.md).
 
 ## Documentation
 
-- [Architecture](./docs/architecture.md)
-- [Prompt Templates](./docs/prompts.md)
-- [API Specification](./docs/api-spec.md)
-- [Test Cases](./docs/test-cases.md)
-- [Vector RAG Upgrade](./docs/vector-rag.md)
+- [Architecture](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/architecture.md)
+- [Prompt Templates](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/prompts.md)
+- [API Specification](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/api-spec.md)
+- [Test Cases](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/test-cases.md)
+- [Vector RAG Upgrade](/Users/krishnaverma/Desktop/agentic-customer-support-system/docs/vector-rag.md)
 
-## Analytics Tracked
+## Operational Notes
 
-The dashboard and logs are designed to track:
-- average response time
-- grounded FAQ auto-resolution rate
-- escalation frequency
-- sentiment distribution
-- category-wise support volume
-- unresolved vs resolved ratio
-
-## Limitations and Ethical Considerations
-
-- Automated responses must be clearly represented as AI-generated when appropriate.
-- Sensitive, emotional, or ambiguous issues should be escalated rather than over-automated.
-- Customer data should be stored securely and handled under privacy-compliant practices.
-- Classification and sentiment models may introduce bias and require periodic review.
-- Human oversight is required to validate escalations and final outcomes.
-
-## Submission Checklist
-
-- GitHub repository link
-- Deployment link for frontend or dashboard
-- Workflow exports included
-- Architecture and prompt documentation included
-- Demo-ready sample data included
-
-## Project Status
-
-- Status: Good to go
-- Reviewed by: Ankur
+- Auto-resolution should be limited to low-risk, well-grounded support questions.
+- Escalation is the preferred path for billing disputes, emotionally charged interactions, fraud concerns, and low-confidence retrieval outcomes.
+- Secrets should be stored in platform variables or credentials, not hardcoded in workflow nodes.
+- Logging should be reviewed periodically to monitor failure modes, escalation rates, and coverage gaps in the support corpus.
 
 ## Team
 
-- Krishna Verma
-- Sambuddha Banerjee
-- Aniruddha Dwivedi
-- Atharv Bind
+- [Krishna Verma](https://github.com/spy-in-shadows)
+- [Sambuddha Banerjee](https://github.com/SammyBanner45)
+- [Aniruddha Dwivedi](https://github.com/Aniruddhadwivedi07)
+- [Atharv Bind](https://github.com/atharvbind)
 
-## Deployment
+## Links
 
-Add your final links here before submission:
-- GitHub: `https://github.com/spy-in-shadows/agentic-customer-support-system`
-- Frontend deployment: `https://<your-demo-url>`
-- Dashboard deployment: `https://<your-dashboard-url>`
+- Repository: [spy-in-shadows/agentic-customer-support-system](https://github.com/spy-in-shadows/agentic-customer-support-system)
+- Backend webhook: [spy-in-shadows.app.n8n.cloud](https://spy-in-shadows.app.n8n.cloud/webhook/agentic-customer-support)
 
 ## License
 
-This repository is intended for academic, demo, and portfolio use.
+This repository is intended for demo, portfolio, and reference use unless otherwise specified.
